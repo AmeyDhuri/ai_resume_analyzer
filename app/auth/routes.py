@@ -3,7 +3,6 @@ import logging
 from flask import Blueprint, request, jsonify
 from app.extensions import db
 from app.auth.models import User
-from werkzeug.security import generate_password_hash
 from app.auth.service import create_user
 
 auth_bp = Blueprint("auth", __name__)
