@@ -17,8 +17,6 @@ def register():
     email = data.get("email")
     password = data.get("password")
 
-
-
     if not email or not password:
         return jsonify({"error": "Email and password required!"}), 400
 
@@ -31,19 +29,13 @@ def register():
     if User.query.filter_by(email=email).first():
         return jsonify({"error": "User already exists!"}), 400
     
-    hashed_password = generate_password_hash(password)
-
-    new_user = User(
-        email=email,
-        password=hashed_password
-    )
-
     try:
-        db.session.add(new_user)
-        db.session.commit()
+        user = create_user(email, password)
+        logging.info("User registered: %s", email)
+
     except Exception as e:
         db.session.rollback()
-        logging.error(f"DB Error: {str(e)}")
+        logging.error("DB Error for %s: %s", email, {str(e)})
         return jsonify({"error": "Database error!"}), 500
 
     return jsonify({
