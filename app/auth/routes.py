@@ -1,0 +1,55 @@
+import re
+import logging 
+from flask import Blueprint, request, jsonify
+from app.extensions import db
+from app.auth.models import User
+from werkzeug.security import generate_password_hash
+from app.auth.service import create_user
+
+auth_bp = Blueprint("auth", __name__)
+
+EMAIL_REGEX = r"[^@]+@[^@]+\.[^@]+"
+
+@auth_bp.route("/register", methods=["POST"])
+def register():
+    data = request.get_json()
+
+    email = data.get("email")
+    password = data.get("password")
+
+
+
+    if not email or not password:
+        return jsonify({"error": "Email and password required!"}), 400
+
+    if not re.match(EMAIL_REGEX, email):
+        return jsonify({"error": "Invalid email format!"}), 400
+    
+    if len(password) <  6:
+        return jsonify({"error": "Password must be at least 6 character"}), 400
+    
+    if User.query.filter_by(email=email).first():
+        return jsonify({"error": "User already exists!"}), 400
+    
+    hashed_password = generate_password_hash(password)
+
+    new_user = User(
+        email=email,
+        password=hashed_password
+    )
+
+    try:
+        db.session.add(new_user)
+        db.session.commit()
+    except Exception as e:
+        db.session.rollback()
+        logging.error(f"DB Error: {str(e)}")
+        return jsonify({"error": "Database error!"}), 500
+
+    return jsonify({
+        "success":True,
+        "data": {
+            "email": email
+        },
+        "message": "User successfully registered."
+    }), 201
