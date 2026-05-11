@@ -3,6 +3,7 @@ import logging
 from flask import Blueprint, request, jsonify
 from app.extensions import db
 from app.auth.models import User
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.auth.service import create_user, authenticate_user
 
 auth_bp = Blueprint("auth", __name__)
@@ -65,14 +66,20 @@ def login():
                 "message" : "Invalid email or pssword"
             }), 401
         
+        access_token = create_access_token(
+            identity=str(user.id)
+        )
+
         logging.info("Use logged in %s", email)
 
         return jsonify({
             "success" : True,
+            "token": access_token,
+            "message" : "Login successful",
             "data" :{
+                "id": user.id,
                 "email" : user.email
             },
-            "message" : "Login successful"
         }), 200
     
     except Exception as e:
@@ -81,3 +88,22 @@ def login():
         return jsonify({
             "error" : "Internal server error"
         }), 500
+    
+@auth_bp.route("/profile", methods=["GET"])
+@jwt_required()
+def profile():
+    current_user_id = get_jwt_identity()
+
+    user = User.query.get(int(current_user_id))
+
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    
+    return jsonify({
+        "success" :True,
+        "message": "Profile fetched successfully",
+        "data" :{
+            "id": user.id,
+            "email": user.email
+        }
+    }), 200
