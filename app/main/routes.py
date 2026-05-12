@@ -1,7 +1,10 @@
-from flask import Blueprint
+from flask import Blueprint, jsonify
 
 main_bp = Blueprint("main", __name__)
 
 @main_bp.route("/")
 def home():
-  return "Home page is working"
+  return jsonify({
+      "success": True,
+      "message": "API is running"
+  }), 200
