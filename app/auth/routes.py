@@ -18,16 +18,28 @@ def register():
     password = data.get("password")
 
     if not email or not password:
-        return jsonify({"error": "Email and password required!"}), 400
+        return jsonify({
+            "success": False,
+            "message": "Email and password required!"
+        }), 400
 
     if not re.match(EMAIL_REGEX, email):
-        return jsonify({"error": "Invalid email format!"}), 400
+        return jsonify({
+            "success": False,
+            "message": "Invalid email format!"
+        }), 400
     
     if len(password) <  6:
-        return jsonify({"error": "Password must be at least 6 character"}), 400
+        return jsonify({
+            "success": False,
+            "message": "Password must be at least 6 character!"
+        }), 400
     
     if User.query.filter_by(email=email).first():
-        return jsonify({"error": "User already exists!"}), 400
+        return jsonify({
+            "success": False,
+            "message": "User already exists!"
+        }), 400
     
     try:
         user = create_user(email, password)
@@ -36,14 +48,17 @@ def register():
     except Exception as e:
         db.session.rollback()
         logging.error("DB Error for %s: %s", email, {str(e)})
-        return jsonify({"error": "Database error!"}), 500
+        return jsonify({
+            "success": False,
+            "message": "Database error!"
+            }), 500
 
     return jsonify({
         "success":True,
+        "message": "User successfully registered.",
         "data": {
             "email": user.email
         },
-        "message": "User successfully registered."
     }), 201
 
 @auth_bp.route("/login", methods=["POST"])
@@ -54,7 +69,10 @@ def login():
     password = data.get("password")
 
     if not email or not password:
-        return jsonify({"error": "Email and password required!"}), 400
+        return jsonify({
+            "success": False,
+            "message": "Email and password required!"
+        }), 400
     
     try:
         user = authenticate_user(email, password)
@@ -86,7 +104,8 @@ def login():
         logging.error("Login error for %s : %s", email, str(e))
 
         return jsonify({
-            "error" : "Internal server error"
+            "success": False,
+            "message" : "Internal server error"
         }), 500
     
 @auth_bp.route("/profile", methods=["GET"])
@@ -97,7 +116,10 @@ def profile():
     user = User.query.get(int(current_user_id))
 
     if not user:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify({
+            "success": False,
+            "message": "User not found!"
+        }), 404
     
     return jsonify({
         "success" :True,

@@ -3,8 +3,6 @@ from dotenv import load_dotenv
 load_dotenv()
 from app.config import Config
 from app.extensions import db, migrate, jwt
-import os
-
 
 
 def create_app():
@@ -24,7 +22,5 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix="/auth")
 
     app.register_blueprint(resume_bp, url_prefix="/resume")
-
-    from app.auth import models
 
     return app
