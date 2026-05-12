@@ -7,7 +7,7 @@ from werkzeug.utils import secure_filename
 def save_resume_file(file):
     original_filename = secure_filename(file.filname)
 
-    unique_filename = (f"{uuid.uuid4()}_{original_name}")
+    unique_filename = (f"{uuid.uuid4()}_{original_filename}")
 
     upload_path = os.path.join(
         current_app.config["UPLOAD_FOLDER"],
