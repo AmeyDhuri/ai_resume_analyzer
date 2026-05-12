@@ -1,9 +1,7 @@
-import os
 import logging
-import uuid
-from flask import Blueprint, request, jsonify, current_app
+from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from werkzeug.utils import secure_filename
+from app.resume.service import save_resume_file
 
 resume_bp = Blueprint("resume", __name__)
 
@@ -43,31 +41,20 @@ def test():
       }), 400
    
    try:
-      original_filename = secure_filename(file.filename)
-
-      unique_filename = (
-         f"{uuid.uuid4()}_{original_filename}"
-      )
-
-      upload_path = os.path.join(
-         current_app.config["UPLOAD_FOLDER"],
-         unique_filename
-      )
-   
-      file.save(upload_path)
+      save_file = save_resume_file(file)
 
       logging.info(
          "Resume uploaded by user %s: %s",
          current_user_id,
-         unique_filename
+         save_file["stored_filename"]
       )
 
       return jsonify({
          "success": True,
          "message": "Resume uploaded successfully!",
          "data": {
-            "original_filename": original_filename,
-            "stored_filename": unique_filename,
+            "original_filename": save_file["original_filename"],
+            "stored_filename": save_file["stored_filename"],
             "upload_by": current_user_id
          }
       }),201
