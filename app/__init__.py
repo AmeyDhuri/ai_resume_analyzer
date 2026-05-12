@@ -1,3 +1,4 @@
+import os
 from flask import Flask, jsonify
 from dotenv import load_dotenv
 load_dotenv()
@@ -8,6 +9,11 @@ from app.extensions import db, migrate, jwt
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    os.makedirs(
+        app.config["UPLOAD_FOLDER"],
+        exist_ok=True
+    )
 
     db.init_app(app)
     migrate.init_app(app, db)
