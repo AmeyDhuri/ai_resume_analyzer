@@ -41,23 +41,24 @@ def test():
       }), 400
    
    try:
-      save_file = save_resume_file(file)
+      resume = save_resume_file(file, current_user_id)
 
       logging.info(
          "Resume uploaded by user %s: %s",
          current_user_id,
-         save_file["stored_filename"]
+         resume["stored_filename"]
       )
 
       return jsonify({
          "success": True,
-         "message": "Resume uploaded successfully!",
+         "message": "Resume uploaded successfully",
          "data": {
-            "original_filename": save_file["original_filename"],
-            "stored_filename": save_file["stored_filename"],
-            "upload_by": current_user_id
-         }
-      }),201
+            "resume_id": resume.id,
+            "original_filename": (resume.original_filename),
+            "stored_filename": (resume.stored_filename),
+            "uploaded_by": resume.user_id
+         }  
+      }), 201
    
    except Exception as e:
       logging.error(
