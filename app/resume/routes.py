@@ -1,7 +1,7 @@
 import logging
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.resume.service import save_resume_file
+from app.resume.service import save_resume_file, get_user_resumes, get_resume_by_id, delete_resume
 
 resume_bp = Blueprint("resume", __name__)
 
@@ -46,7 +46,7 @@ def test():
       logging.info(
          "Resume uploaded by user %s: %s",
          current_user_id,
-         resume["stored_filename"]
+         resume.stored_filename
       )
 
       return jsonify({
@@ -69,6 +69,72 @@ def test():
 
       return jsonify({
          "success": False,
-         "message": "File upload failed!"
+         "message": str(e)
       }), 500
 
+
+@resume_bp.route("/my-resumes", methods=["GET"])
+@jwt_required()
+def my_resumes():
+   current_user_id = get_jwt_identity()
+
+   resumes = get_user_resumes(current_user_id)
+
+   data = []
+
+   for resume in resumes:
+      data.append({
+         "id": resume.id,
+         "original_filename": (resume.original_filename),
+         "stored_filename": (resume.stored_filename),
+         "uploaded_at": (resume.uploaded_at)
+      })
+
+      
+   return jsonify({
+      "success": True,
+      "count": len(data),
+      "data": data
+   }), 200
+
+
+@resume_bp.route("/<int:resume_id>", methods=["GET"])
+@jwt_required()
+def get_resume(resume_id):
+   current_user_id = get_jwt_identity()
+
+   resume = get_resume_by_id(resume_id, current_user_id)
+
+   if not resume:
+      return jsonify({
+         "success": False,
+         "message": "Resume not found"
+      }), 400
+   
+   return jsonify({
+      "success": True,
+      "data": {
+         "id": resume.id,
+         "original_filename": (resume.original_filename),
+         "stored_filename": (resume.stored_filename),
+         "uploaded_at": (resume.uploaded_at)
+      }
+   }), 200
+
+@resume_bp.route("/<int:resume_id>", methods=["DELETE"])
+@jwt_required()
+def remove_resume(resume_id):
+   current_user_id = get_jwt_identity()
+
+   deleted_resume = delete_resume(resume_id, current_user_id)
+
+   if not deleted_resume:
+      return jsonify({
+         "session": False,
+         "message": "Resume not found"
+      }), 404
+   
+   return jsonify({
+      "success": True,
+      "message": ("Resume deleted successfully")
+   }), 200
