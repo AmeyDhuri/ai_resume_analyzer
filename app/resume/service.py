@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 from app.extensions import db
 from app.resume.models import Resume
 from app.utils.parser import extract_text_from_docx, extract_text_from_pdf, clean_resume_text
+from app.utils.analyzer import extracts_skills, calculate_ats_score, get_missing_skills, generate_resume_feedback
 
 
 def save_resume_file(file, user_id):
@@ -70,3 +71,24 @@ def parse_resume_text(resume):
     cleaned_text = clean_resume_text(raw_text) 
 
     return cleaned_text
+
+def analyze_resume(resume):
+    parse_text = parse_resume_text(resume)
+
+    if not parse_text:
+        return None
+    
+    skills = extracts_skills(parse_text)
+
+    ats_score = calculate_ats_score(skills)
+
+    missing_skills = get_missing_skills(skills)
+
+    feedback = generate_resume_feedback(ats_score)
+
+    return {
+        "skills": skills,
+        "ats_score": ats_score,
+        "missing_skills": missing_skills,
+        "feedback": feedback
+    }
