@@ -4,6 +4,7 @@ from flask import current_app
 from werkzeug.utils import secure_filename
 from app.extensions import db
 from app.resume.models import Resume
+from app.utils.parser import extract_text_from_docx, extract_text_from_pdf, clean_resume_text
 
 
 def save_resume_file(file, user_id):
@@ -53,3 +54,19 @@ def delete_resume(resume_id, user_id):
     db.session.commit()
 
     return resume
+
+def parse_resume_text(resume):
+    file_path = resume.upload_path
+
+    if resume.original_filename.endswith(".pdf"):
+        raw_text = extract_text_from_pdf(file_path)
+
+    elif resume.original_filename.endswith(".docx"):
+        raw_text = extract_text_from_docx(file_path)
+    
+    else:
+        return None
+    
+    cleaned_text = clean_resume_text(raw_text) 
+
+    return cleaned_text

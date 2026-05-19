@@ -1,7 +1,7 @@
 import logging
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.resume.service import save_resume_file, get_user_resumes, get_resume_by_id, delete_resume
+from app.resume.service import save_resume_file, get_user_resumes, get_resume_by_id, delete_resume, parse_resume_text
 
 resume_bp = Blueprint("resume", __name__)
 
@@ -138,3 +138,26 @@ def remove_resume(resume_id):
       "success": True,
       "message": ("Resume deleted successfully")
    }), 200
+
+@resume_bp.route("/<int:resume_id>/parse", methods=["GET"])
+@jwt_required()
+def parse_resume(resume_id):
+   current_user_id = get_jwt_identity()
+
+   resume = get_resume_by_id(resume_id, current_user_id)
+
+   if not resume :
+      return jsonify({
+         "success": False,
+         "message": "Resume not found!"
+      }), 404
+   
+   parsed_text = parse_resume_text(resume)
+
+   return jsonify({
+      "success": True,
+      "data": {
+         "resume_id": resume.id,
+         "parsed_text": parsed_text
+      }
+   }), 200  
