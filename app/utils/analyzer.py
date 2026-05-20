@@ -59,3 +59,45 @@ def generate_resume_feedback(score):
     
     else:
         return "Resume weak for ATS system"
+    
+def match_resume_to_job(resume_skills, job_description):
+    job_description = job_description.lower()
+
+    matched_skills = []
+
+    missing_skills = []
+
+    for skill in COMMON_SKILLS:
+        if skill in job_description:
+            if skill in resume_skills:
+                matched_skills.append(skill)
+
+            else:
+                missing_skills.append(skill)
+
+    total_required = (len(matched_skills) + len(missing_skills))
+
+    if total_required == 0:
+        match_percentage = 0
+
+    else:
+        match_percentage = (len(matched_skills) / total_required) * 100
+
+    return {
+        "matched_skills":matched_skills,
+        "missing_skills":missing_skills,
+        "match_percentage":round(match_percentage, 2)
+    }
+
+def generate_job_fit_feedback(match_percentage):
+    if match_percentage >= 80:
+        return "Excellent match fot this role"
+    
+    elif match_percentage >= 60:
+        return "Good candidate match"
+    
+    elif match_percentage >= 40:
+        return "Partial skill match"
+    
+    else:
+        return "Low match for this role"

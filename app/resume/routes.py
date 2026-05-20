@@ -1,8 +1,7 @@
 import logging
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.resume.service import save_resume_file, get_user_resumes, get_resume_by_id, delete_resume, parse_resume_text
-from app.resume.service import analyze_resume
+from app.resume.service import save_resume_file, get_user_resumes, get_resume_by_id, delete_resume, parse_resume_text, analyze_resume, compare_resume_with_job
 
 resume_bp = Blueprint("resume", __name__)
 
@@ -182,3 +181,33 @@ def analyzer_resume_route(resume_id):
          "success": True,
          "data": analysis
       }), 200
+
+@resume_bp.route("/<int:resume_id>/match-job", methods=["POST"])
+@jwt_required()
+def match_resume_to_job(resume_id):
+   current_user_id = get_jwt_identity()
+
+   resume = get_resume_by_id(resume_id, current_user_id)
+
+   if not resume:
+      return jsonify({
+         "success": False,
+         "message": "Resume not found"
+      }), 400
+   
+   data = request.get_json()
+
+   job_description = data.get("job_description")
+
+   if not job_description:
+      return jsonify({
+         "success": False,
+         "message": "Job description required"
+      }), 400
+   
+   result = compare_resume_with_job(resume, job_description)
+
+   return jsonify({
+      "success": True,
+      "data": result
+   }), 200
