@@ -9,6 +9,7 @@ from app.extensions import db, migrate, jwt
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
+    app.config["UPLOAD_FOLDER"] = "uploads"
 
     os.makedirs(
         app.config["UPLOAD_FOLDER"],

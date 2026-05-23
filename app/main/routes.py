@@ -1,4 +1,9 @@
-from flask import Blueprint, render_template, redirect, request, url_for, session, flash
+from flask import Blueprint, render_template, redirect, request, url_for, session, flash, current_app
+import os
+from werkzeug.utils import secure_filename
+from app.resume.models import Resume
+from app.auth.models import User
+from app.extensions import db
 
 from app.auth.service import create_user, authenticate_user
 
@@ -48,11 +53,55 @@ def login():
 @main_bp.route("/dashboard")
 def dashboard():
    
-   email =  session.get("user_email")
+   email = session.get("user_email")
+
+   if not email:
+      flash("Please login first", "warning")
+
+      return redirect(url_for("main.login"))
+   
+   user = User.query.filter_by(email=email).first()
+
+   resumes = Resume.query.filter_by(user_id=user.id).all()
+   
+   return render_template("dashboard.html", email=email, resumes=resumes)
+
+@main_bp.route("/upload-resume", methods=["GET", "POST"])
+def upload_resume():
+   email = session.get("user_email")
 
    if not email:
       flash("Please login first", "danger")
 
       return redirect(url_for("main.login"))
    
-   return render_template("dashboard.html", email=email)
+   if request.method == "POST":
+      
+      file = request.files.get("resume")
+      
+      if not file:
+            flash("No file selected!", "danger")
+
+            return redirect(url_for("main.upload_resume"))
+      filename = secure_filename(file.filename)
+
+      upload_folder = current_app.config["UPLOAD_FOLDER"]
+
+      os.makedirs(upload_folder, exist_ok=True)
+
+      upload_path = os.path.join(upload_folder, filename)
+
+      file.save(upload_path)
+
+      user = User.query.filter_by(email=email).first()
+
+      resume = Resume(original_filename=filename, stored_filename=filename, upload_path=upload_path, user_id=user.id)
+
+      db.session.add(resume)
+      db.session.commit()
+
+      flash("Resume uploaded successfully!", "success")
+
+      return redirect(url_for("main.dashboard"))
+
+   return render_template("upload_resume.html")
