@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, redirect, request, url_for, sessio
 import os
 from werkzeug.utils import secure_filename
 from app.resume.models import Resume
+from app.resume.service import analyze_resume
 from app.auth.models import User
 from app.extensions import db
 
@@ -12,6 +13,7 @@ main_bp = Blueprint("main", __name__)
 @main_bp.route("/")
 def home():
   return redirect(url_for("main.login"))
+
 
 @main_bp.route("/register", methods=["GET", "POST"])
 def resgister():
@@ -30,6 +32,7 @@ def resgister():
          flash("Registration failed!", "danger")
 
   return render_template("register.html")
+
 
 @main_bp.route("/login", methods=["GET", "POST"])
 def login():
@@ -50,6 +53,7 @@ def login():
    
    return render_template("login.html")
 
+
 @main_bp.route("/dashboard")
 def dashboard():
    
@@ -65,6 +69,7 @@ def dashboard():
    resumes = Resume.query.filter_by(user_id=user.id).all()
    
    return render_template("dashboard.html", email=email, resumes=resumes)
+
 
 @main_bp.route("/upload-resume", methods=["GET", "POST"])
 def upload_resume():
@@ -105,3 +110,10 @@ def upload_resume():
       return redirect(url_for("main.dashboard"))
 
    return render_template("upload_resume.html")
+
+
+@main_bp.route("/resume/<int:resume_id>/analyze")
+def analyze_resume_page(resume_id):
+   result = analyze_resume(resume_id)
+
+   return render_template("resume_analysis.html", result=result)

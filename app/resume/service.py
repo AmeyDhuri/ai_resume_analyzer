@@ -72,13 +72,15 @@ def parse_resume_text(resume):
 
     return cleaned_text
 
-def analyze_resume(resume):
-    parse_text = parse_resume_text(resume)
+def analyze_resume(resume_id):
+    resume = Resume.query.get(resume_id)
 
-    if not parse_text:
+    if not resume:
         return None
     
-    skills = extracts_skills(parse_text)
+    parsed_text = parse_resume_text(resume)
+    
+    skills = extracts_skills(parsed_text)
 
     ats_score = calculate_ats_score(skills)
 
@@ -87,8 +89,10 @@ def analyze_resume(resume):
     feedback = generate_resume_feedback(ats_score)
 
     return {
+        "resume": resume,
+        "text": parsed_text,
         "skills": skills,
-        "ats_score": ats_score,
+        "ats_score": ats_score, 
         "missing_skills": missing_skills,
         "feedback": feedback
     }

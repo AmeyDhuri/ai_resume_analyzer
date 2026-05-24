@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block title %}
+Resume Analysis
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+
+    <div class="card shadow-lg border-0 rounded-4 p-4">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+
+            <h2>
+                Resume Analysis
+            </h2>
+
+            <a href="{{ url_for('main.dashboard') }}"
+               class="btn btn-secondary">
+
+                Back to Dashboard
+
+            </a>
+
+        </div>
+
+
+        <div class="mb-4">
+
+            <h5>
+                Resume Filename
+            </h5>
+
+            <p class="text-muted">
+
+                {{ result.resume.original_filename }}
+
+            </p>
+
+        </div>
+
+
+        <div class="mb-4">
+
+            <h5>
+                ATS Score
+            </h5>
+
+            <div class="progress" style="height: 35px;">
+
+                <div
+                    class="progress-bar bg-success"
+                    role="progressbar"
+                    style="width: {{ result.ats_score }}%;"
+                >
+
+                    {{ result.ats_score }}%
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="mb-4">
+
+            <h5>
+                Extracted Skills
+            </h5>
+
+            {% if result.skills %}
+
+                {% for skill in result.skills %}
+
+                    <span class="badge bg-primary me-2 mb-2 p-2">
+
+                        {{ skill }}
+
+                    </span>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div class="alert alert-warning">
+
+                    No skills detected.
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <div class="mb-4">
+
+            <h5>
+                Missing Skills
+            </h5>
+
+            {% if result.missing_skills %}
+
+                {% for skill in result.missing_skills %}
+
+                    <span class="badge bg-danger me-2 mb-2 p-2">
+
+                        {{ skill }}
+
+                    </span>
+
+                {% endfor %}
+
+            {% else %}
+
+                <div class="alert alert-success">
+
+                    No missing skills found.
+
+                </div>
+
+            {% endif %}
+
+        </div>
+
+
+        <div class="mb-4">
+
+            <h5>
+                Resume Feedback
+            </h5>
+
+            <div class="alert alert-info">
+
+                {{ result.feedback }}
+
+            </div>
+
+        </div>
+
+
+        <div class="mb-4">
+
+            <h5>
+                Extracted Resume Text
+            </h5>
+
+            <div class="border rounded p-3 bg-light">
+
+                <pre style="white-space: pre-wrap;">
+
+                      {{ result.text[:2000] }}
+
+                </pre>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

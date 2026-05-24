@@ -33,7 +33,7 @@ Dashboard
 
 </div>
 
-<div class="card shadow p-4">
+<div class="card shadow-lg border-0 p-4 rounded-4">
 
     <h4 class="mb-3">
         Uploaded Resumes
@@ -49,6 +49,7 @@ Dashboard
                     <th>ID</th>
                     <th>Filename</th>
                     <th>Uploaded At</th>
+                    <th>Actions</th>
                 </tr>
 
             </thead>
@@ -70,6 +71,12 @@ Dashboard
                     <td>
                         {{ resume.uploaded_at }}
                     </td>
+                    
+                    <td>
+                        <a href="{{ url_for('main.analyze_resume_page', resume_id=resume.id) }}" class="btn btn-success btn-sm">
+                            Analyze
+                        </a>
+                    </td>
 
                 </tr>
 
@@ -81,7 +88,7 @@ Dashboard
 
     {% else %}
 
-        <p>No resumes uploaded yet.</p>
+    <div class="alert alert-info"> No resumes uploaded yet. </div>
 
     {% endif %}
 
