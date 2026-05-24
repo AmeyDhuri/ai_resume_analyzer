@@ -6,11 +6,11 @@ Resume Analysis
 
 {% block content %}
 
-<div class="container mt-5">
+<div class="container mt-5 mb-5">
 
     <div class="card shadow-lg border-0 rounded-4 p-4">
 
-        <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
 
             <h2>
                 Resume Analysis
@@ -143,19 +143,15 @@ Resume Analysis
 
         <div class="mb-4">
 
-            <h5>
-                Extracted Resume Text
-            </h5>
+            <h5>Extracted Resume Text</h5>
 
-            <div class="border rounded p-3 bg-light">
+                <div style="background: #f8f9fa; border: 1px solid #ccc; border-radius: 10px; margin: 0;" class="px-2 py-2">
 
-                <pre style="white-space: pre-wrap;">
+                    <p style="margin: 0; padding: 10px; text-indent: 0; white-space: normal;">
+                        {{ result.text }}
+                    </p>
 
-                      {{ result.text[:2000] }}
-
-                </pre>
-
-            </div>
+                </div>
 
         </div>
 

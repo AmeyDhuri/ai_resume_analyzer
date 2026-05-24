@@ -5,3 +5,11 @@ body {
 .card {
     border-radius: 12px;
 }
+
+.btn-success {
+    transition: 0.2s ease;
+}
+
+.btn-success:hover {
+    transform: scale(1.05);
+}

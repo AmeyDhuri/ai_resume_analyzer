@@ -66,9 +66,22 @@ def dashboard():
    
    user = User.query.filter_by(email=email).first()
 
-   resumes = Resume.query.filter_by(user_id=user.id).all()
+   search = request.args.get("search", "")
+
+   sort = request.args.get("sort", "lastest")
+
+   resumes_query = Resume.query.filter_by(user_id=user.id)
+
+   if search:
+      resumes_query = resumes_query.filter(Resume.original_filename.ilike(f"%{search}%"))
    
-   return render_template("dashboard.html", email=email, resumes=resumes)
+   if sort == "oldest":
+      resumes = resumes_query.order_by(Resume.uploaded_at.asc()).all()
+
+   else:
+      resumes = resumes_query.order_by(Resume.uploaded_at.desc()).all()
+   
+   return render_template("dashboard.html", email=email, resumes=resumes, search=search)
 
 
 @main_bp.route("/upload-resume", methods=["GET", "POST"])

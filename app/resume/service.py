@@ -68,7 +68,7 @@ def parse_resume_text(resume):
     else:
         return None
     
-    cleaned_text = clean_resume_text(raw_text) 
+    cleaned_text = clean_resume_text(raw_text)
 
     return cleaned_text
 
@@ -79,7 +79,7 @@ def analyze_resume(resume_id):
         return None
     
     parsed_text = parse_resume_text(resume)
-    
+
     skills = extracts_skills(parsed_text)
 
     ats_score = calculate_ats_score(skills)

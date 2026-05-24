@@ -33,7 +33,41 @@ Dashboard
 
 </div>
 
-<div class="card shadow-lg border-0 p-4 rounded-4">
+<form method="GET" action="{{ url_for('main.dashboard') }}" class=" row g-3 mb-5">
+    <div class="input-group">
+            <input type="text" name="search" class="form-control" placeholder="Search resumes..." value="{{ search }}">
+            <button class="btn btn-dark">Search</button>
+    </div>
+</form>
+
+<form method="GET" class="mb-4">
+        <div class="row">
+                <div class="col-md-3">
+                        <select name="sort" class="form-select">
+                                <option value="latest"
+                                    {% if sort == "latest" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    Latest
+                                </option>
+                                <option value="oldest" 
+                                    {% if sort == "oldest" %}
+                                        selected
+                                    {% endif %}
+                                >
+                                    Oldest
+                                </option>
+                        </select>
+                </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-dark px-3 py-1.5">
+                Submit
+            </button>
+        </div>
+</form>
+
+<div class="card shadow-lg border-0 p-4 rounded-4 mt-4">
 
     <h4 class="mb-3">
         Uploaded Resumes
@@ -69,7 +103,7 @@ Dashboard
                     </td>
 
                     <td>
-                        {{ resume.uploaded_at }}
+                        {{ resume.uploaded_at.strftime('%d %b %Y %I:%M %p') }}
                     </td>
                     
                     <td>
@@ -88,7 +122,19 @@ Dashboard
 
     {% else %}
 
-    <div class="alert alert-info"> No resumes uploaded yet. </div>
+    <div class="alert alert-info">
+
+        {% if search %}
+
+            No resumes found for "{{ search }}"
+        
+        {% else %}
+
+            No resumes uploaded yet.
+
+        {% endif %}
+
+    </div>
 
     {% endif %}
 
