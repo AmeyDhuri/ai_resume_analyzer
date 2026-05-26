@@ -139,7 +139,36 @@ Resume Analysis
             </div>
 
         </div>
+            
+            <div class="mb-4">
 
+                <h4>
+                    AI Resume Feedback
+                </h4>
+
+                <div class="ai-feedback">
+
+                    {% for line in result.ai_feedback.split('\n') %}
+
+                        {% if line.startswith('##') %}
+
+                            <h5 class="feedback-heading">
+                                {{ line.replace('##', '').strip() }}
+                            </h5>
+
+                        {% elif line.startswith('-') %}
+
+                            <p class="feedback-point">
+                                {{ line.replace('-', '•').strip() }}
+                            </p>
+
+                        {% endif %}
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
 
         <div class="mb-4">
 

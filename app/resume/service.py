@@ -6,7 +6,7 @@ from app.extensions import db
 from app.resume.models import Resume
 from app.utils.parser import extract_text_from_docx, extract_text_from_pdf, clean_resume_text
 from app.utils.analyzer import extracts_skills, calculate_ats_score, get_missing_skills, generate_resume_feedback,match_resume_to_job, generate_job_fit_feedback
-
+from app.ai.service import generate_ai_feedback
 
 def save_resume_file(file, user_id):
     original_filename = secure_filename(file.filename)
@@ -88,13 +88,21 @@ def analyze_resume(resume_id):
 
     feedback = generate_resume_feedback(ats_score)
 
+    try:
+        ai_feedback = generate_ai_feedback(parsed_text)
+
+    except Exception as e:
+        print(e)
+        ai_feedback = "AI feedback unavailable"
+
     return {
         "resume": resume,
         "text": parsed_text,
         "skills": skills,
         "ats_score": ats_score, 
         "missing_skills": missing_skills,
-        "feedback": feedback
+        "feedback": feedback,
+        "ai_feedback": ai_feedback
     }
 
 def compare_resume_with_job(resume, job_description):

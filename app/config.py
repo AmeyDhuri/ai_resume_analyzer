@@ -7,3 +7,4 @@ class Config:
     UPLOAD_FOLDER = "uploads"
     MAX_CONTENT_LENGTH = 16 * 1024 *1024
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    OPENAI_API_KEY= os.getenv("OPENAI_API_KEY")
