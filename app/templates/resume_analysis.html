@@ -63,69 +63,6 @@ Resume Analysis
 
         </div>
 
-
-        <div class="mb-4">
-
-            <h5>
-                Extracted Skills
-            </h5>
-
-            {% if result.skills %}
-
-                {% for skill in result.skills %}
-
-                    <span class="badge bg-primary me-2 mb-2 p-2">
-
-                        {{ skill }}
-
-                    </span>
-
-                {% endfor %}
-
-            {% else %}
-
-                <div class="alert alert-warning">
-
-                    No skills detected.
-
-                </div>
-
-            {% endif %}
-
-        </div>
-
-
-        <div class="mb-4">
-
-            <h5>
-                Missing Skills
-            </h5>
-
-            {% if result.missing_skills %}
-
-                {% for skill in result.missing_skills %}
-
-                    <span class="badge bg-danger me-2 mb-2 p-2">
-
-                        {{ skill }}
-
-                    </span>
-
-                {% endfor %}
-
-            {% else %}
-
-                <div class="alert alert-success">
-
-                    No missing skills found.
-
-                </div>
-
-            {% endif %}
-
-        </div>
-
-
         <div class="mb-4">
 
             <h5>
@@ -159,7 +96,7 @@ Resume Analysis
                         {% elif line.startswith('-') %}
 
                             <p class="feedback-point">
-                                {{ line.replace('-', '•').strip() }}
+                                {{ line.replace('-', ' ').strip() }}
                             </p>
 
                         {% endif %}

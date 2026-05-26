@@ -1,5 +1,6 @@
 import os
 import uuid
+from datetime import datetime
 from flask import current_app
 from werkzeug.utils import secure_filename
 from app.extensions import db
@@ -82,18 +83,29 @@ def analyze_resume(resume_id):
 
     skills = extracts_skills(parsed_text)
 
-    ats_score = calculate_ats_score(skills)
+    ats_score = calculate_ats_score(parsed_text, skills)
 
     missing_skills = get_missing_skills(skills)
 
     feedback = generate_resume_feedback(ats_score)
 
-    try:
+    if resume.is_analyzed and resume.ai_feedback:
+            ai_feedback = resume.ai_feedback
+
+    else:
         ai_feedback = generate_ai_feedback(parsed_text)
 
-    except Exception as e:
-        print(e)
-        ai_feedback = "AI feedback unavailable"
+        resume.ai_feedback = ai_feedback
+
+        resume.is_analyzed = True
+
+        resume.analyzed_at = datetime.utcnow()
+
+        resume.ai_model = "pih3"
+
+        resume.ats_score = ats_score
+
+        db.session.commit()
 
     return {
         "resume": resume,
@@ -124,3 +136,32 @@ def compare_resume_with_job(resume, job_description):
         "match_percentage": matching_result["match_percentage"],
         "feedback": feebdack
     }
+
+def score_feedback(feedback):
+    score = 0
+
+    required_sections = ["Strengths", "Weaknesses", "Missing Skills", "ATS Tips", "Improvements"]
+
+    for section in required_sections:
+        if section in feedback:
+            score += 10
+
+    if len(feedback) < 2000:
+        score += 10
+
+    if feedback.count("##") >=2 :
+        score +=10
+
+    return score
+
+def generate_best_feedback(parsed_text):
+    responses = []
+
+    for _ in range(3):
+        feedback = generate_ai_feedback(parsed_text)
+
+        responses.append(feedback)
+    
+    best_feedback = max(responses, key=score_feedback)
+
+    return best_feedback

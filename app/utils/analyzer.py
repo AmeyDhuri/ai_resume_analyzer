@@ -1,4 +1,5 @@
 COMMON_SKILLS = [
+
     "python",
     "flask",
     "django",
@@ -17,7 +18,15 @@ COMMON_SKILLS = [
     "aws",
     "rest api",
     "machine learning",
-    "data analysis"
+    "data analysis",
+    "linux",
+    "network security",
+    "penetration testing",
+    "figma",
+    "ui ux",
+    "excel",
+    "communication",
+    "teamwork"
 ]
 
 def extracts_skills(text):
@@ -31,12 +40,65 @@ def extracts_skills(text):
 
     return list(set(found_skills))
 
-def calculate_ats_score(skills):
-    max_score = len(COMMON_SKILLS)
+def calculate_ats_score(text, skills):
+    text = text.lower()
 
-    score = (len(skills) / max_score) * 100
+    score = 0
 
-    return round(score, 2)
+    sections = [
+
+        "skills",
+        "education",
+        "project",
+        "experience",
+        "certification",
+        "summary"
+    ]
+
+    for section in sections:
+        if section in text:
+            score += 10
+
+    skill_score = min(len(skills) * 2, 20)
+
+    if "-" in text or "•"  in text:
+        score += 10
+
+    word_count = len(text.split())
+
+    if 300 <= word_count <= 1200:
+        score +=15
+
+    project_keywords = [
+
+        "project",
+        "developed",
+        "built",
+        "created",
+        "implemented"
+    ]
+
+    for kerword in project_keywords:
+        if kerword in text:
+            score += 2
+
+    certification_keywords = [
+
+        "certified",
+        "certification",
+        "aws",
+        "oracle",
+        "google"
+    ]
+
+    for keyword in certification_keywords:
+        if kerword in text:
+            score += 2
+    
+    if text.count("\n") > 10:
+        score += 5 
+
+    return min(round(score, 2), 100)
 
 def get_missing_skills(skills):
     missing = []
@@ -45,16 +107,16 @@ def get_missing_skills(skills):
         if skill not in skills:
             missing.append(skill)
 
-    return missing
+    return missing[:10]
 
 def generate_resume_feedback(score):
-    if score >= 80:
+    if score >= 85:
         return "Excellent resume profile"
     
-    elif score >= 60:
+    elif score >= 65:
         return "Good but can be improved"
     
-    elif score >= 40:
+    elif score >= 45:
         return "Average resume needs more skills"
     
     else:
