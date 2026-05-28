@@ -1,4 +1,5 @@
 from app.extensions import db
+from zoneinfo import ZoneInfo
 from datetime import datetime
 
 class User(db.Model):
@@ -9,7 +10,7 @@ class User(db.Model):
     email = db.Column(db.String(255), unique=True, nullable=False)
     password = db.Column(db.String(255), nullable=False)
 
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=lambda: datetime.now(ZoneInfo("Asia/Kolkata")))
 
     resumes = db.relationship(
         "Resume",

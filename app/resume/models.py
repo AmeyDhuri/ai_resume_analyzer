@@ -1,4 +1,5 @@
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from app.extensions import db
 
 class Resume(db.Model):
@@ -9,10 +10,10 @@ class Resume(db.Model):
   original_filename = db.Column(db.String(255), nullable=False)
   stored_filename = db.Column(db.String(255), nullable=False)
   upload_path = db.Column(db.String(500), nullable=False)
-  uploaded_at = db.Column(db.DateTime, default=datetime.utcnow)
+  uploaded_at = db.Column(db.DateTime, default=lambda: datetime.now(ZoneInfo("Asia/Kolkata")))
   user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
   ai_feedback = db.Column(db.Text)
   ats_score = db.Column(db.Integer)
   is_analyzed = db.Column(db.Boolean, default=False)
-  analyzed_at = db.Column(db.DateTime)
+  analyzed_at = db.Column(db.DateTime, default=lambda: datetime.now(ZoneInfo("Asia/Kolkata")))
   ai_model = db.Column(db.String(50))
