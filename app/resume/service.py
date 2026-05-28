@@ -165,3 +165,25 @@ def generate_best_feedback(parsed_text):
     best_feedback = max(responses, key=score_feedback)
 
     return best_feedback
+
+def analyze_job_match(resume_id, job_description):
+    resume = Resume.query.get(resume_id)
+
+    if not resume: 
+        return None
+    
+    parse_text = parse_resume_text(resume)
+
+    resume_skills = extracts_skills(parse_text)
+
+    match_result = match_resume_to_job(resume_skills, job_description)
+
+    fit_feedback = generate_job_fit_feedback(match_result["match_percentage"])
+
+    return {
+        "resume_skills": resume_skills,
+        "matched_skills": match_result["matched_skills"],
+        "missing_skills": match_result["missing_skills"],
+        "match_percentage": match_result["match_percentage"],
+        "fit_feedback": fit_feedback
+    }

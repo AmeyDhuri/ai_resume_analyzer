@@ -83,7 +83,7 @@ Dashboard
                     <th>ID</th>
                     <th>Filename</th>
                     <th>Uploaded At</th>
-                    <th>Actions</th>
+                    <th class="text-center">Actions</th>
                 </tr>
 
             </thead>
@@ -107,9 +107,15 @@ Dashboard
                     </td>
                     
                     <td>
-                        <a href="{{ url_for('main.analyze_resume_page', resume_id=resume.id) }}" class="btn btn-success btn-sm">
-                            Analyze
-                        </a>
+                        <div class="d-flex justify-content-center gap-2">
+                            <a href="{{ url_for('main.analyze_resume_page', resume_id=resume.id) }}" class="btn btn-success btn-sm">
+                                Analyze
+                            </a>
+                        
+                            <a href="{{ url_for('main.job_match', resume_id=resume.id) }}" class="btn btn-dark btn-sm">
+                                Job Match
+                            </a>
+                        </div>
                     </td>
 
                 </tr>

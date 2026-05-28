@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}
+Job Match
+{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4">
+
+    <div class="card shadow-lg border-0 p-4 rounded-4 mb-3">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+
+            <h1 class="mb-0" style="font-size:xx-large;">
+                Resume vs Job Description Match
+            </h1>
+
+            <a href="{{ url_for('main.dashboard') }}" class="btn btn-secondary">
+                ← Back
+            </a>
+        </div>
+
+        <form method="POST">
+
+            <div class="mb-3">
+
+                <label class="form-label">
+                    Paste Job Description
+                </label>
+
+                <textarea
+                    name="job_description"
+                    rows="10"
+                    class="form-control"
+                    required
+                ></textarea>
+
+            </div>
+
+            <button type="submit"
+                    class="btn btn-primary">
+
+                Analyze Match
+
+            </button>
+
+        </form>
+
+    </div>
+
+    {% if result %}
+
+    <div class="card shadow-sm border-0 mt-4 mb-4 p-4 rounded-4">
+
+        <h3>
+            Match Score:
+            {{ result.match_percentage }}%
+        </h3>
+
+        <p class="mt-2">
+            {{ result.fit_feedback }}
+        </p>
+
+        <hr>
+
+        <h4>
+            Matching Skills
+        </h4>
+
+        <div class="mb-4">
+
+            {% if result.matched_skills %}
+
+                {% for skill in result.matched_skills %}
+
+                    <span class="badge bg-success me-2 mb-2 p-2">
+                        {{ skill }}
+                    </span>
+
+                {% endfor %}
+
+            {% else %}
+
+                <p>No matching skills found.</p>
+
+            {% endif %}
+
+        </div>
+
+        <h4>
+            Missing Skills
+        </h4>
+
+        <div>
+
+            {% if result.missing_skills %}
+
+                {% for skill in result.missing_skills %}
+
+                    <span class="badge bg-danger me-2 mb-2 p-2">
+                        {{ skill }}
+                    </span>
+
+                {% endfor %}
+
+            {% else %}
+
+                <p>No missing skills detected.</p>
+
+            {% endif %}
+
+        </div>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

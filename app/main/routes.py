@@ -2,10 +2,9 @@ from flask import Blueprint, render_template, redirect, request, url_for, sessio
 import os
 from werkzeug.utils import secure_filename
 from app.resume.models import Resume
-from app.resume.service import analyze_resume
+from app.resume.service import analyze_resume, analyze_job_match
 from app.auth.models import User
 from app.extensions import db
-
 from app.auth.service import create_user, authenticate_user
 
 main_bp = Blueprint("main", __name__)
@@ -130,3 +129,22 @@ def analyze_resume_page(resume_id):
    result = analyze_resume(resume_id)
 
    return render_template("resume_analysis.html", result=result)
+
+@main_bp.route("/resume/<int:resume_id>/job-match", methods=["GET", "POST"])
+def job_match(resume_id):
+      email = session.get("user_email")
+
+      if not email:
+         flash("Please login first", "warning")
+         return redirect(url_for("main.login"))
+      
+      resume = Resume.query.get_or_404(resume_id)
+
+      result =  None
+
+      if request.method == "POST":
+         job_description = request.form.get("job_description")
+
+         result = analyze_job_match(resume_id, job_description)
+
+      return render_template("job_match.html", resume=resume, result=result)

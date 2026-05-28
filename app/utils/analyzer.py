@@ -153,7 +153,7 @@ def match_resume_to_job(resume_skills, job_description):
 
 def generate_job_fit_feedback(match_percentage):
     if match_percentage >= 80:
-        return "Excellent match fot this role"
+        return "Excellent match for this role"
     
     elif match_percentage >= 60:
         return "Good candidate match"
