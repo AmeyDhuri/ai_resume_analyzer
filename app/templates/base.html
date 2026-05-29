@@ -16,17 +16,56 @@
 
   <div class="container mt-5">
     {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{ category }}">
+
+      {% if messages %}
+
+          {% for category, message in messages %}
+
+              <div class="alert alert-{{ category }} alert-dismissible fade show auto-dismiss">
+
                   {{ message }}
-                </div>
-            {% endfor %}
+
+                  <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="alert">
+                  </button>
+
+              </div>
+
+          {% endfor %}
+
         {% endif %}
-    {% endwith %}
+
+      {% endwith %}
 
     {% block content %}
     {% endblock %}
   </div>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+
+      document.addEventListener("DOMContentLoaded", function () {
+
+          setTimeout(function () {
+
+              let alerts = document.querySelectorAll(".auto-dismiss");
+
+              alerts.forEach(function(alert) {
+
+                  let bsAlert = bootstrap.Alert.getOrCreateInstance(alert);
+
+                  bsAlert.close();
+
+              });
+
+          }, 3000);
+
+      });
+
+  </script>
+
+</body>
 </body>
 </html>
