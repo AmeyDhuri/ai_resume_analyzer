@@ -1,24 +1,55 @@
 import os
+import logging
 from flask import Flask, jsonify
-from dotenv import load_dotenv
-load_dotenv()
+
 from app.config import Config
-from app.extensions import db, migrate, jwt
+from app.extensions import db, migrate, jwt, limiter
 
 
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
-    app.config["UPLOAD_FOLDER"] = "uploads"
+
+    app.config["UPLOAD_FOLDER"] = os.path.join(
+        app.root_path,
+        "uploads"
+    )
 
     os.makedirs(
         app.config["UPLOAD_FOLDER"],
         exist_ok=True
     )
 
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(levelname)s - %(message)s"
+    )
+
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
+    limiter.init_app(app)
+
+    @jwt.expired_token_loader
+    def expired_token_callback(jwt_header, jwt_payload):
+        return jsonify({
+            "success": False,
+            "message": "Token has expired"
+        }), 401
+
+    @jwt.invalid_token_loader
+    def invalid_token_callback(error):
+        return jsonify({
+            "success": False,
+            "message": "Invalid token"
+        }), 401
+    
+    @jwt.unauthorized_loader
+    def missing_token_callback(error):
+        return jsonify({
+            "success": False,
+            "message": "Authorization token required"
+        }), 401
 
     from app.main.routes import main_bp
     from app.auth.routes import auth_bp
@@ -39,5 +70,19 @@ def create_app():
             "success": False,
             "message": "Route not found!"
         }), 404
+
+    @app.errorhandler(413)
+    def file_too_large(error):
+        return jsonify({
+            "success": False,
+            "message": "File size exceeds upload limit"
+        }), 413
+
+    @app.errorhandler(429)
+    def rate_limit_handler(error):
+        return jsonify({
+            "success": False,
+            "message": "Too many requests. Please try again later"
+        }), 429
 
     return app

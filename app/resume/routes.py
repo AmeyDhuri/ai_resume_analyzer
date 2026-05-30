@@ -1,4 +1,5 @@
-import logging
+import logging 
+from app.extensions import limiter
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.resume.service import save_resume_file, get_user_resumes, get_resume_by_id, delete_resume, parse_resume_text, analyze_resume, compare_resume_with_job
@@ -6,6 +7,11 @@ from app.resume.service import save_resume_file, get_user_resumes, get_resume_by
 resume_bp = Blueprint("resume", __name__)
 
 ALLOWED_EXTENSIONS = {"pdf", "docx"}
+
+ALLOWED_MIME_TYPES = {
+    "application/pdf",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+}
 
 def allowed_file(filename):
    return (
@@ -16,6 +22,7 @@ def allowed_file(filename):
 
 @resume_bp.route("/uploads", methods=["POST"])
 @jwt_required()
+@limiter.limit("10 per minute")
 def test():
    
    current_user_id = get_jwt_identity()
@@ -27,6 +34,12 @@ def test():
       }), 400
    
    file = request.files["resume"]
+
+   if file.mimetype not in ALLOWED_MIME_TYPES:
+      return jsonify({
+         "success": False,
+         "message": "Invalid file type"
+      }), 400
 
    if file.filename == "":
       return jsonify({
@@ -164,6 +177,7 @@ def parse_resume(resume_id):
 
 @resume_bp.route("/<int:resume_id>/analyze", methods=["GET"])
 @jwt_required()
+@limiter.limit("5 per minute")
 def analyzer_resume_route(resume_id):
       current_user_id = get_jwt_identity()
 
@@ -184,6 +198,7 @@ def analyzer_resume_route(resume_id):
 
 @resume_bp.route("/<int:resume_id>/match-job", methods=["POST"])
 @jwt_required()
+@limiter.limit("5 per minute")
 def match_resume_to_job(resume_id):
    current_user_id = get_jwt_identity()
 

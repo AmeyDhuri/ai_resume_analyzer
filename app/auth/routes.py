@@ -1,7 +1,7 @@
 import re
-import logging 
+import logging
 from flask import Blueprint, request, jsonify
-from app.extensions import db
+from app.extensions import db, limiter
 from app.auth.models import User
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.auth.service import create_user, authenticate_user
@@ -11,6 +11,7 @@ auth_bp = Blueprint("auth", __name__)
 EMAIL_REGEX = r"[^@]+@[^@]+\.[^@]+"
 
 @auth_bp.route("/register", methods=["POST"])
+@limiter.limit("3 per minute")
 def register():
     data = request.get_json()
 
@@ -62,6 +63,7 @@ def register():
     }), 201
 
 @auth_bp.route("/login", methods=["POST"])
+@limiter.limit("3 per minute")
 def login():
     data = request.get_json()
 

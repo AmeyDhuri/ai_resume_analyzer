@@ -1,4 +1,8 @@
-import os 
+import os
+from datetime import timedelta 
+from dotenv import load_dotenv
+
+load_dotenv()
 
 class Config:
     SECRET_KEY = os.getenv("SECRET_KEY")
@@ -7,4 +11,11 @@ class Config:
     UPLOAD_FOLDER = "uploads"
     MAX_CONTENT_LENGTH = 16 * 1024 *1024
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    OPENAI_API_KEY= os.getenv("OPENAI_API_KEY")
+    OLLAMA_API_URL = os.getenv("OLLAMA_API_URL")
+    JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
+
+class DevelopmentCofig(Config):
+    DEBUG = True
+
+class ProductionConfig(Config):
+    DEBUG = False

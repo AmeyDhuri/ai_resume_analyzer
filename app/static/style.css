@@ -6,11 +6,14 @@ body {
     border-radius: 12px;
 }
 
-.btn-success {
+.btn-success,
+.btn-dark {
     transition: 0.2s ease;
 }
 
-.btn-success:hover {
+.btn-success:hover,
+.btn-dark:hover
+{
     transform: scale(1.05);
 }
 
