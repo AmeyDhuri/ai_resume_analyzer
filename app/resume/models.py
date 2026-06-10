@@ -14,6 +14,6 @@ class Resume(db.Model):
   user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
   ai_feedback = db.Column(db.Text)
   ats_score = db.Column(db.Integer)
-  is_analyzed = db.Column(db.Boolean, default=False)
+  is_analyzed = db.Column(db.Boolean, nullable=False, default=False)
   analyzed_at = db.Column(db.DateTime, default=lambda: datetime.now(ZoneInfo("Asia/Kolkata")))
   ai_model = db.Column(db.String(50))

@@ -8,11 +8,90 @@
   <link rel="stylesheet" href="{{ url_for('static', filename = 'style.css') }}">
 </head>
 <body>
+  {% if session.get("user_email") %}
+    <div id="profileSidebar" class="profile-sidebar">
+
+      <div class="p-4">
+
+          <h4>Profile</h4>
+
+          <p>
+              <strong>Email:</strong>
+              {{ session.get("user_email") }}
+          </p>
+
+          <button
+              class="btn btn-secondary w-100 mb-2"
+              onclick="toggleTheme()">
+              Toggle Theme
+          </button>
+
+          <a
+              href="{{ url_for('main.change_password') }}"
+              class="btn btn-secondary w-100 mb-2">
+              Change Password
+          </a>
+
+          <a
+              href="{{ url_for('main.logout') }}"
+              class="btn btn-danger w-100 mb-2">
+              Logout
+          </a>
+          <button
+              class="btn btn-secondary w-25"
+              onclick="closeProfile()">
+              Back
+          </button>
+      </div>
+
+    </div>
+  {% endif %}
+
   <nav class="navbar navbar-dark bg-dark px-4">
+
     <a href="/" class="navbar-brand">
-      AI Resume Analyzer
+        AI Resume Analyzer
     </a>
-  </nav>
+    {% if session.get("user_email") %}
+     <div class="d-flex gap-3">
+            <a 
+                class="nav-link text-light"
+                id="profileBtn">
+                Profile
+            </a>
+    {% endif %}
+
+        {% if is_admin %}
+            <a href="{{ url_for('main.dashboard') }}"
+              class="nav-link text-light">
+                Dashboard
+            </a>
+
+            <a href="{{ url_for('main.admin_dashboard') }}"
+              class="nav-link text-light">
+                Admin
+            </a>
+
+            <a href="{{ url_for('main.admin_users') }}"
+              class="nav-link text-light">
+                Users
+            </a>
+
+            <a href="{{ url_for('main.admin_resumes') }}"
+              class="nav-link text-light">
+                Resumes
+            </a>
+
+            <a href="{{ url_for('main.admin_logs') }}"
+              class="nav-link text-light">
+                Logs
+            </a>
+
+        {% endif %}
+
+    </div>
+
+</nav>
 
   <div class="container mt-5">
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -65,7 +144,64 @@
       });
 
   </script>
+  <script>
+      const profileSidebar =
+          document.getElementById("profileSidebar");
 
-</body>
+      function openProfile() {
+
+          profileSidebar.classList.add(
+              "active"
+          );
+
+      }
+
+      function closeProfile() {
+
+          profileSidebar.classList.remove(
+              "active"
+          );
+
+      }
+
+      document
+          .getElementById("profileBtn")
+          .addEventListener(
+              "click",
+              function () {
+
+                  openProfile();
+
+              }
+          );
+
+  </script>
+  <script>
+
+    function toggleTheme() {
+
+        document.body.classList.toggle(
+            "dark-mode"
+        );
+
+        localStorage.setItem(
+            "theme",
+            document.body.classList.contains(
+                "dark-mode"
+            )
+        );
+
+    }
+
+    if (
+        localStorage.getItem("theme")
+        === "true"
+    ) {
+        document.body.classList.add(
+            "dark-mode"
+        );
+    }
+
+  </script>
 </body>
 </html>

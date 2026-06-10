@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="mb-4">All Resumes</h2>
+
+<table class="table table-bordered">
+
+    <thead>
+        <tr>
+            <th class="text-center">User ID</th>
+            <th>Filename</th>
+            <th class="text-center">Analyzed</th>
+            <th class="text-center" >ATS Score</th>
+            <th class="text-center">Uploaded</th>
+            <th class="text-center">Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+    {% for resume in resumes %}
+
+        <tr>
+
+            <td class="text-center">{{ resume.user_id }}</td>
+
+            <td>{{ resume.original_filename }}</td>
+
+            <td class="text-center">
+                {{ resume.is_analyzed }}
+            </td>
+
+            <td class="text-center">
+                {{ resume.ats_score }}
+            </td>
+
+            <td>
+                {{ resume.uploaded_at }}
+            </td>
+
+            <td class="text-center">
+                <a href="{{ url_for('main.delete_resume', resume_id=resume.id) }}" class="btn btn-danger btn-sm" onclick="return confirm('Delete this resume?')">Delete</a>
+            </td>
+        </tr>
+
+    {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% endblock %}

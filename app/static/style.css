@@ -55,3 +55,52 @@ body {
 .alert {
     transition: opacity 0.5s ease;
 }
+
+.nav-link {
+    color: white !important;
+    text-decoration: none;
+}
+
+.nav-link:hover {
+    text-decoration: underline;
+}
+
+.profile-sidebar {
+
+    position: fixed;
+
+    top: 0;
+
+    right: -350px;
+
+    width: 350px;
+
+    height: 100%;
+
+    background: white;
+
+    box-shadow: -2px 0 10px rgba(0,0,0,.2);
+
+    transition: right 0.3s ease;
+
+    z-index: 9999;
+}
+
+.profile-sidebar.active {
+
+    right: 0;
+}
+
+.dark-mode {
+
+    background: #121212;
+
+    color: white;
+}
+
+.dark-mode .profile-sidebar {
+
+    background: #1f1f1f;
+
+    color: white;
+}

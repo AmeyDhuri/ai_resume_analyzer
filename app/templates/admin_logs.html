@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="mb-4">Audit Logs</h2>
+
+<table class="table table-hover">
+
+    <thead>
+
+        <tr>
+            <th>ID</th>
+            <th>Admin ID</th>
+            <th>Action</th>
+            <th>Target</th>
+            <th>Created</th>
+        </tr>
+
+    </thead>
+
+    <tbody>
+
+    {% for log in logs %}
+
+        <tr>
+
+            <td>{{ log.id }}</td>
+
+            <td>{{ log.admin_id }}</td>
+
+            <td>{{ log.action }}</td>
+
+            <td>{{ log.target }}</td>
+
+            <td>{{ log.created_at }}</td>
+
+        </tr>
+
+    {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% endblock %}

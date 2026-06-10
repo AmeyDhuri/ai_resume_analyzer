@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="mb-4">Users</h2>
+
+<table class="table table-bordered">
+
+    <thead>
+        <tr>
+            <th>Email</th>
+            <th class="text-center">Role</th>
+            <th class="text-center">Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+    {% for user in users %}
+
+        <tr>
+            <td>{{ user.email }}</td>
+
+            <td class="text-center">
+
+                {% if user.role == "admin" %}
+                    <span class="badge bg-danger">
+                        Admin
+                    </span>
+                {% else %}
+                    <span class="badge bg-secondary">
+                        User
+                    </span>
+                {% endif %}
+
+            </td>
+
+            <td class="text-center">
+
+                {% if user.role == "user" %}
+
+                <a
+                href="{{ url_for('main.promote_user', user_id=user.id) }}"
+                class="btn btn-success btn-sm">
+
+                Promote
+
+                </a>
+
+                {% else %}
+
+                <a
+                href="{{ url_for('main.demote_user', user_id=user.id) }}"
+                class="btn btn-warning btn-sm">
+
+                Demote
+
+                </a>
+
+                {% endif %}
+
+                </td>
+
+        </tr>
+
+    {% endfor %}
+
+    </tbody>
+
+</table>
+
+{% endblock %}  

@@ -12,6 +12,8 @@ class User(db.Model):
 
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(ZoneInfo("Asia/Kolkata")))
 
+    role = db.Column(db.String(20), nullable=False, default="user", server_default="user")
+
     resumes = db.relationship(
         "Resume",
         backref = "user",

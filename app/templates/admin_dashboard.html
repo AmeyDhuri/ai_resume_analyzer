@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<h2 class="mb-4">Admin Dashboard</h2>
+
+<div class="row">
+
+    <div class="col-md-4 mb-3">
+        <div class="card p-3">
+            <h5>Total Users</h5>
+            <h3>{{ stats.total_users }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card p-3">
+            <h5>Total Resumes</h5>
+            <h3>{{ stats.total_resumes }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card p-3">
+            <h5>Analyzed Resumes</h5>
+            <h3>{{ stats.analyzed_resumes }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card p-3">
+            <h5>Pending Analysis</h5>
+            <h3>{{ stats.pending_analysis }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card p-3">
+            <h5>Average ATS Score</h5>
+            <h3>{{ stats.average_ats_score }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card p-3">
+            <h5>Highest ATS Score</h5>
+            <h3>{{ stats.highest_ats_score }}</h3>
+        </div>
+    </div>
+
+</div>
+
+<div class="card shadow-lg border-0 pt-3 pb-2 px-4 py-4 rounded-4 mt-1 mb-4">
+    <h3 class="mb-3">Uploads Per User</h3>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th class="text-center">Resume Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in stats.uploads_per_user %}
+            <tr>
+                <td>
+                {{ user.email }}
+                </td>
+                <td class="text-center">
+                {{ user.resume_count }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,5 +1,7 @@
-from flask import Blueprint, render_template, redirect, request, url_for, session, flash, current_app
 import os
+from sqlalchemy import func
+from werkzeug.security import check_password_hash, generate_password_hash
+from flask import Blueprint, render_template, redirect, request, url_for, session, flash, current_app
 from werkzeug.utils import secure_filename
 from app.resume.models import Resume
 from app.resume.service import analyze_resume, analyze_job_match
@@ -7,6 +9,7 @@ from app.resume.routes import allowed_file
 from app.auth.models import User
 from app.extensions import db
 from app.auth.service import create_user, authenticate_user
+from app.admin.models import Auditlog
 
 main_bp = Blueprint("main", __name__)
 
@@ -205,3 +208,245 @@ def job_match(resume_id):
          result = analyze_job_match(resume_id, job_description)
 
       return render_template("job_match.html", resume=resume, result=result)
+
+@main_bp.route("/admin/dashboard")
+def admin_dashboard():
+   email = session.get("user_email")
+
+   if not email:
+      flash("Please login first", "warning")
+      return redirect(url_for("main.login"))
+   
+   user = User.query.filter_by(email=email).first()
+
+   if user.role != "admin":
+      flash("Admin access required", "danger")
+      return redirect(url_for("main.dashboard"))
+   
+   scored_resumes = Resume.query.filter_by(
+        is_analyzed=True
+        ).all()
+
+   average_ats_score = 0
+
+   if scored_resumes:
+        average_ats_score = round(
+            sum(resume.ats_score for resume in scored_resumes)
+            / len(scored_resumes),
+            2
+        )
+   highest_resume = Resume.query.filter_by(is_analyzed=True).order_by(Resume.ats_score.desc()).first()
+
+   highest_ats_score = (
+        highest_resume.ats_score
+        if highest_resume
+        else 0
+    )
+   
+   uploads_per_user = (
+        db.session.query(
+            User.email,
+            func.count(Resume.id)
+        )
+        .join(
+            Resume,
+            User.id == Resume.user_id
+        )
+        .group_by(User.email)
+        .all()
+    )
+
+   user_uploads = []
+
+   for email, count in uploads_per_user:
+
+        user_uploads.append({
+            "email": email,
+            "resume_count": count
+        })
+
+   stats = {
+      "total_users": User.query.count(),
+      "total_resumes": Resume.query.count(),
+      "analyzed_resumes": Resume.query.filter_by(is_analyzed=True).count(),
+      "pending_analysis": Resume.query.filter_by(is_analyzed=False).count(),
+      "average_ats_score": average_ats_score,
+      "highest_ats_score": highest_ats_score,
+      "uploads_per_user": user_uploads
+   }
+
+   return render_template("admin_dashboard.html", stats=stats)
+
+@main_bp.route("/admin/users")
+def admin_users():
+   email = session.get("user_email")
+
+   if not email:
+      flash("Please login first", "danger")
+      return redirect(url_for("main.login"))
+   
+   current_user = User.query.filter_by(email=email).first()
+
+   if current_user.role != "admin":
+      flash("Admin access only", "danger")
+      return redirect(url_for("main.dashboard"))
+   
+   users = User.query.order_by(User.id.asc()).all()
+
+   return render_template("admin_users.html", users=users)
+
+@main_bp.route("/admin/resumes")
+def admin_resumes():
+   email = session.get("user_email")
+
+   if not email:
+      flash("Please login first", "danger")
+      return redirect(url_for("main.login"))
+   
+   current_user = User.query.filter_by(email=email).first()
+
+   if current_user.role != "admin":
+      flash("Admin access only", "danger")
+      return redirect(url_for("main.dashboard"))
+   
+   resumes = Resume.query.order_by(Resume.uploaded_at.desc()).all()
+
+   return render_template("admin_resumes.html", resumes=resumes)
+
+@main_bp.route("/admin/logs")
+def admin_logs():
+   email = session.get("user_email")
+
+   if not email:
+      flash("Please login first", "danger")
+      return redirect(url_for("main.login"))
+   
+   current_user = User.query.filter_by(email=email).first()
+
+   if current_user.role != "admin":
+      flash("Admin access only", "danger")
+      return redirect(url_for("main.dashboard"))
+   
+   logs = Auditlog.query.order_by(Auditlog.created_at.desc()).all()
+
+   return render_template("admin_logs.html", logs=logs)
+
+@main_bp.app_context_processor
+def inject_admin_status():
+
+   email = session.get("user_email")
+
+   if not email:
+      return {"is_admin": False}
+
+   user = User.query.filter_by(email=email).first()
+
+   return {"is_admin": user and user.role == "admin"
+}
+
+@main_bp.route("/logout")
+def logout():
+
+   session.clear()
+
+   flash("Logged out successfully", "success")
+
+   return redirect(url_for("main.login"))
+
+@main_bp.route("/change-password",methods=["GET", "POST"])
+def change_password():
+   email = session.get("user_email")
+
+   if not email:
+      flash("Please login first", "danger")
+      return redirect(url_for("main.login"))
+   
+   user = User.query.filter_by(email=email).first()
+
+   if request.method == "POST":
+      current_password = request.form.get("current_password")
+
+      new_password = request.form.get("new_password")
+
+      if not check_password_hash(user.password,current_password):
+         flash("Current password is incorrect", "danger")
+         return redirect(url_for("main.change_password"))
+      
+      user.password = generate_password_hash(new_password)
+
+      db.session.commit()
+
+      flash("Password changed successfully", "success")
+      return redirect(url_for("main.dashboard"))
+      
+   return render_template("change_password.html")
+
+@main_bp.route("/admin/users/<int:user_id>/promote")
+def promote_user(user_id):
+   email = session.get("user_email")
+
+   if not email:
+      return redirect(url_for("main.login"))
+   
+   current_user = User.query.filter_by(email=email).first()
+
+   if current_user.role != "admin":
+      return redirect(url_for("main.dashboard"))
+   
+   user =  User.query.get_or_404(user_id)
+
+   user.role = "admin"
+
+   db.session.commit()
+
+   flash("User promoted successfully", "success")
+   return redirect(url_for("main.admin_users"))
+
+@main_bp.route("/admin/users/<int:user_id>/demote")
+def demote_user(user_id):
+   email = session.get("user_email")
+
+   if not email:
+      return redirect(url_for("main.login"))
+   
+   current_user = User.query.filter_by(email=email).first()
+
+   if current_user.role != "admin":
+      return redirect(url_for("main.dashboard"))
+   
+   user =  User.query.get_or_404(user_id)
+
+   if user.id == current_user.id:
+      flash("You cannot demote yourself", "danger")
+      return redirect(url_for("main.admin_users"))
+
+   user.role = "user"
+
+   db.session.commit()
+
+   flash("User demoted successfully", "success")
+   return redirect(url_for("main.admin_users"))
+
+@main_bp.route("/admin/resumes/<int:resume_id>/delete")
+def delete_resume(resume_id):
+   email = session.get("user_email")
+
+   if not email:
+      return redirect(url_for("main.login"))
+   
+   current_user = User.query.filter_by(email=email).first()
+
+   if current_user.role != "admin":
+      return redirect(url_for("main.dashboard"))
+   
+   resume =  Resume.query.get_or_404(resume_id)
+
+   if resume.upload_path and os.path.exists(resume.upload_path):
+      os.remove(resume.upload_path)
+
+   db.session.delete(resume)
+
+   db.session.commit()
+
+   flash("Resume deleted successfully", "success")
+   return redirect(url_for("main.admin_resumes")) 

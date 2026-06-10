@@ -54,6 +54,7 @@ def create_app():
     from app.main.routes import main_bp
     from app.auth.routes import auth_bp
     from app.resume.routes import resume_bp
+    from app.admin.routes import admin_bp
 
     from app.auth import models
     from app.resume import models
@@ -63,6 +64,8 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix="/auth")
 
     app.register_blueprint(resume_bp, url_prefix="/resume")
+
+    app.register_blueprint(admin_bp, url_prefix="/admin")
 
     @app.errorhandler(404)
     def not_found(error):
