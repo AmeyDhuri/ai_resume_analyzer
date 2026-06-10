@@ -9,3 +9,4 @@ def create_auditlog(admin_id, action, target):
     )
 
     db.session.add(log)
+    db.session.commit()

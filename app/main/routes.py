@@ -10,6 +10,7 @@ from app.auth.models import User
 from app.extensions import db
 from app.auth.service import create_user, authenticate_user
 from app.admin.models import Auditlog
+from app.admin.service import create_auditlog
 
 main_bp = Blueprint("main", __name__)
 
@@ -399,6 +400,8 @@ def promote_user(user_id):
 
    db.session.commit()
 
+   create_auditlog(admin_id=current_user.id, action="PROMOTE USER", target=user.email)
+
    flash("User promoted successfully", "success")
    return redirect(url_for("main.admin_users"))
 
@@ -424,6 +427,8 @@ def demote_user(user_id):
 
    db.session.commit()
 
+   create_auditlog(admin_id=current_user.id, action="DEMOTE USER", target=user.email)
+
    flash("User demoted successfully", "success")
    return redirect(url_for("main.admin_users"))
 
@@ -443,6 +448,8 @@ def delete_resume(resume_id):
 
    if resume.upload_path and os.path.exists(resume.upload_path):
       os.remove(resume.upload_path)
+
+   create_auditlog(admin_id=current_user.id, action="DELETE RESUME", target=f"Resume #{resume.id}")
 
    db.session.delete(resume)
 
