@@ -382,7 +382,7 @@ def change_password():
       
    return render_template("change_password.html")
 
-@main_bp.route("/admin/users/<int:user_id>/promote", methods=["POST"])
+@main_bp.route("/admin/users/<int:user_id>/promote")
 def promote_user(user_id):
    email = session.get("user_email")
 
@@ -405,7 +405,7 @@ def promote_user(user_id):
    flash("User promoted successfully", "success")
    return redirect(url_for("main.admin_users"))
 
-@main_bp.route("/admin/users/<int:user_id>/demote", methods=["POST"])
+@main_bp.route("/admin/users/<int:user_id>/demote")
 def demote_user(user_id):
    email = session.get("user_email")
 
