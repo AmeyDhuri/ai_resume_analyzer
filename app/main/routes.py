@@ -1,7 +1,7 @@
 import os
 from sqlalchemy import func
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask import Blueprint, render_template, redirect, request, url_for, session, flash, current_app
+from flask import Blueprint, render_template, redirect, request, url_for, session, flash, current_app, send_file
 from werkzeug.utils import secure_filename
 from app.resume.models import Resume
 from app.resume.service import analyze_resume, analyze_job_match
@@ -382,7 +382,7 @@ def change_password():
       
    return render_template("change_password.html")
 
-@main_bp.route("/admin/users/<int:user_id>/promote")
+@main_bp.route("/admin/users/<int:user_id>/promote", methods=["POST"])
 def promote_user(user_id):
    email = session.get("user_email")
 
@@ -405,7 +405,7 @@ def promote_user(user_id):
    flash("User promoted successfully", "success")
    return redirect(url_for("main.admin_users"))
 
-@main_bp.route("/admin/users/<int:user_id>/demote")
+@main_bp.route("/admin/users/<int:user_id>/demote", methods=["POST"])
 def demote_user(user_id):
    email = session.get("user_email")
 
@@ -432,7 +432,7 @@ def demote_user(user_id):
    flash("User demoted successfully", "success")
    return redirect(url_for("main.admin_users"))
 
-@main_bp.route("/admin/resumes/<int:resume_id>/delete")
+@main_bp.route("/admin/resumes/<int:resume_id>/delete", methods=["POST"])
 def delete_resume(resume_id):
    email = session.get("user_email")
 
@@ -457,3 +457,22 @@ def delete_resume(resume_id):
 
    flash("Resume deleted successfully", "success")
    return redirect(url_for("main.admin_resumes")) 
+
+@main_bp.route("/resume/<int:resume_id>/view")
+def view_resume(resume_id):
+   email = session.get("user_email")
+
+   if not email:
+      return redirect(url_for("main.login"))
+   
+   current_user = User.query.filter_by(email=email).first()
+
+   resume = Resume.query.get_or_404(resume_id)
+
+   if resume.user_id != current_user.id:
+      flash("Access denied!", "danger")
+      return redirect(url_for("main.dashboard"))
+   
+   return send_file(
+      resume.upload_path
+   )

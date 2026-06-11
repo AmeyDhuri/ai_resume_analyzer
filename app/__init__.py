@@ -3,7 +3,7 @@ import logging
 from flask import Flask, jsonify
 
 from app.config import Config
-from app.extensions import db, migrate, jwt, limiter
+from app.extensions import db, migrate, jwt, limiter, csrf
 
 
 def create_app():
@@ -29,6 +29,7 @@ def create_app():
     migrate.init_app(app, db)
     jwt.init_app(app)
     limiter.init_app(app)
+    csrf.init_app(app)
 
     @jwt.expired_token_loader
     def expired_token_callback(jwt_header, jwt_payload):
@@ -66,6 +67,12 @@ def create_app():
     app.register_blueprint(resume_bp, url_prefix="/resume")
 
     app.register_blueprint(admin_bp, url_prefix="/admin")
+
+    csrf.exempt(auth_bp)
+
+    csrf.exempt(resume_bp)
+    
+    csrf.exempt(admin_bp)
 
     @app.errorhandler(404)
     def not_found(error):

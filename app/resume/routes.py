@@ -1,8 +1,9 @@
 import logging 
 from app.extensions import limiter
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_file
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.resume.service import save_resume_file, get_user_resumes, get_resume_by_id, delete_resume, parse_resume_text, analyze_resume, compare_resume_with_job
+from app.resume.models import Resume
 
 resume_bp = Blueprint("resume", __name__)
 
@@ -177,7 +178,7 @@ def parse_resume(resume_id):
 
 @resume_bp.route("/<int:resume_id>/analyze", methods=["GET"])
 @jwt_required()
-@limiter.limit("5 per minute")
+@limiter.limit("10 per hour")
 def analyzer_resume_route(resume_id):
       current_user_id = get_jwt_identity()
 
@@ -198,7 +199,7 @@ def analyzer_resume_route(resume_id):
 
 @resume_bp.route("/<int:resume_id>/match-job", methods=["POST"])
 @jwt_required()
-@limiter.limit("5 per minute")
+@limiter.limit("10 per hour")
 def match_resume_to_job(resume_id):
    current_user_id = get_jwt_identity()
 
@@ -226,3 +227,27 @@ def match_resume_to_job(resume_id):
       "success": True,
       "data": result
    }), 200
+
+@resume_bp.route("/<int:resume_id>/view", methods=["GET"])
+@jwt_required()
+def view_resume(resume_id):
+   current_user_id = get_jwt_identity()
+
+   resume = Resume.query.get(resume_id)
+
+   if not resume:
+      return jsonify({
+         "success": False,
+         "message": "Resume not found"
+      }), 404 
+   
+   if resume.user_id != current_user_id:
+      return jsonify({
+         "success": False,
+         "message": "Acess denied"
+      }), 403
+   
+   return send_file(
+      resume.upload_path,
+      as_attachment=False
+   )

@@ -39,8 +39,28 @@
                 {{ resume.uploaded_at }}
             </td>
 
-            <td class="text-center">
-                <a href="{{ url_for('main.delete_resume', resume_id=resume.id) }}" class="btn btn-danger btn-sm" onclick="return confirm('Delete this resume?')">Delete</a>
+            <td>
+                <form
+                    method="POST"
+                    action="{{ url_for('main.delete_resume', resume_id=resume.id) }}"
+                    style="display:inline;"
+                >
+
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        value="{{ csrf_token() }}"
+                    >
+
+                    <button
+                        type="submit"
+                        class="btn btn-danger btn-sm"
+                        onclick="return confirm('Delete this resume?')"
+                    >
+                        Delete
+                    </button>
+
+                </form>
             </td>
         </tr>
 
