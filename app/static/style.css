@@ -104,3 +104,16 @@ body {
 
     color: white;
 }
+
+body.dark-mode .card,
+body.dark-mode .table,
+body.dark-mode th,
+body.dark-mode td {
+    background-color: #1e1e1e;
+    color: #ffffff;
+}
+
+body.dark-mode .feedback-heading,
+body.dark-mode .feedback-point {
+    color: white !important;
+}

@@ -32,7 +32,7 @@ Resume Analysis
                 Resume Filename
             </h5>
 
-            <p class="text-muted">
+            <p>
 
                 {{ result.resume.original_filename }}
 
@@ -83,7 +83,7 @@ Resume Analysis
                     AI Resume Feedback
                 </h4>
 
-                <div class="ai-feedback">
+                <div style="border: 1px solid #ccc; border-radius: 10px; margin: 0;" class="card ai-feedback">
 
                     {% for line in result.ai_feedback.split('\n') %}
 
@@ -111,7 +111,7 @@ Resume Analysis
 
             <h5>Extracted Resume Text</h5>
 
-                <div style="background: #f8f9fa; border: 1px solid #ccc; border-radius: 10px; margin: 0;" class="px-2 py-2">
+                <div style="border: 1px solid #ccc; border-radius: 10px; margin: 0;" class="card px-2 py-2">
 
                     <p style="margin: 0; padding: 10px; text-indent: 0; white-space: normal;">
                         {{ result.text }}
