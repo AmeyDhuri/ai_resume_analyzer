@@ -261,12 +261,6 @@ This helps users identify areas where their resume can be strengthened for bette
 
 ---
 
-## License
-
-This project is licensed under the MIT License.
-
----
-
 ## Author
 
 **Amey Dhuri**
