@@ -65,10 +65,10 @@ def parse_resume_text(resume):
 
     elif resume.original_filename.endswith(".docx"):
         raw_text = extract_text_from_docx(file_path)
-    
+
     else:
         return None
-    
+
     cleaned_text = clean_resume_text(raw_text)
 
     return cleaned_text
@@ -78,40 +78,39 @@ def analyze_resume(resume_id):
 
     if not resume:
         return None
-    
+
     parsed_text = parse_resume_text(resume)
 
     skills = extracts_skills(parsed_text)
 
+    print("Extracted Skills:", skills)
+
     ats_score = calculate_ats_score(parsed_text, skills)
+
+    print("ATS Score:", ats_score)
 
     missing_skills = get_missing_skills(skills)
 
     feedback = generate_resume_feedback(ats_score)
 
     if resume.is_analyzed and resume.ai_feedback:
-            ai_feedback = resume.ai_feedback
-
+        ai_feedback = resume.ai_feedback
     else:
         ai_feedback = generate_ai_feedback(parsed_text)
 
         resume.ai_feedback = ai_feedback
-
         resume.is_analyzed = True
-
         resume.analyzed_at = datetime.utcnow()
-
-        resume.ai_model = "pih3"
-
+        resume.ai_model = "qwen2.5:0.5b"
         resume.ats_score = ats_score
 
         db.session.commit()
-
+        
     return {
         "resume": resume,
         "text": parsed_text,
         "skills": skills,
-        "ats_score": ats_score, 
+        "ats_score": ats_score,
         "missing_skills": missing_skills,
         "feedback": feedback,
         "ai_feedback": ai_feedback

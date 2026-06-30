@@ -83,6 +83,7 @@ Dashboard
                     <th>ID</th>
                     <th>Filename</th>
                     <th>Uploaded At</th>
+                    <th>Status</th>
                     <th class="text-center">Actions</th>
                 </tr>
 
@@ -105,6 +106,42 @@ Dashboard
                     <td>
                         {{ resume.uploaded_at.strftime('%d %b %Y %I:%M %p') }}
                     </td>
+
+                    <td>
+
+                        {% if resume.analysis_status == "pending" %}
+
+                            <span class="badge bg-warning text-dark">
+                                Pending
+                            </span>
+
+                        {% elif resume.analysis_status == "processing" %}
+
+                            <span class="badge bg-info">
+                                Processing
+                            </span>
+
+                        {% elif resume.analysis_status == "completed" %}
+
+                            <span class="badge bg-success">
+                                Completed
+                            </span>
+
+                        {% elif resume.analysis_status == "failed" %}
+
+                            <span class="badge bg-danger">
+                                Failed
+                            </span>
+
+                        {% else %}
+
+                            <span class="badge bg-secondary">
+                                Unknown
+                            </span>
+
+                        {% endif %}
+
+                    </td>
                     
                     <td>
                         <div class="d-flex justify-content-center gap-2">
@@ -119,6 +156,17 @@ Dashboard
                             <a href="{{ url_for('main.view_resume', resume_id=resume.id)}}" class="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer">
                                 View
                             </a>
+
+                            {% if resume.analysis_status == "completed" %}
+                                <a href="{{ url_for('main.view_analysis', resume_id=resume.id) }}"
+                                class="btn btn-primary btn-sm">
+                                    View Analysis
+                                </a>
+                                {% else %}
+                                <button class="btn btn-primary btn-sm" disabled>
+                                    View Analysis
+                                </button>
+                            {% endif %}
                         </div>
                     </td>
 

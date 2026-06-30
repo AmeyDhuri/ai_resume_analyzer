@@ -197,6 +197,29 @@ def analyzer_resume_route(resume_id):
          "data": analysis
       }), 200
 
+
+@resume_bp.route("/<int:resume_id>/analysis", methods=["GET"])
+def get_analysis(resume_id):
+    resume = Resume.query.get_or_404(resume_id)
+
+    if resume.analysis_status != "completed":
+        return jsonify({
+            "success": False,
+            "message": "Analysis not completed."
+        }), 400
+
+    result = analyze_resume(resume_id)
+
+    return jsonify({
+        "success": True,
+        "resume_id": resume.id,
+        "ats_score": result["ats_score"],
+        "skills": result["skills"],
+        "missing_skills": result["missing_skills"],
+        "feedback": result["feedback"],
+        "ai_feedback": result["ai_feedback"]
+    }), 200
+
 @resume_bp.route("/<int:resume_id>/match-job", methods=["POST"])
 @jwt_required()
 @limiter.limit("10 per hour")

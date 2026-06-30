@@ -11,6 +11,7 @@ from app.extensions import db
 from app.auth.service import create_user, authenticate_user
 from app.admin.models import Auditlog
 from app.admin.service import create_auditlog
+from app.tasks.resume_tasks import analyze_resume_task
 
 main_bp = Blueprint("main", __name__)
 
@@ -187,9 +188,28 @@ def upload_resume():
 
 @main_bp.route("/resume/<int:resume_id>/analyze")
 def analyze_resume_page(resume_id):
-   result = analyze_resume(resume_id)
+   analyze_resume_task.delay(resume_id)
 
-   return render_template("resume_analysis.html", result=result)
+   flash("Analysis started in background.", "success")
+
+   return redirect(url_for("main.dashboard"))
+
+
+@main_bp.route("/resume/<int:resume_id>/analysis")
+def view_analysis(resume_id):
+    resume = Resume.query.get_or_404(resume_id)
+
+    if resume.analysis_status != "completed":
+        flash("Resume analysis is not completed yet.", "warning")
+        return redirect(url_for("main.dashboard"))
+
+    result = analyze_resume(resume_id)
+
+    return render_template(
+        "resume_analysis.html",
+        result=result
+    )
+
 
 @main_bp.route("/resume/<int:resume_id>/job-match", methods=["GET", "POST"])
 def job_match(resume_id):

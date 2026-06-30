@@ -33,8 +33,8 @@ def generate_ai_feedback(resume_text):
   Resume:
   {resume_text[:700]}
   """
-  response = requests.post("http://127.0.0.1:11434/api/generate", json={"model": "phi3", "prompt": prompt, "stream": False, "options": {"temperature": 0.3}}, timeout=300)
-
+  response = requests.post("http://127.0.0.1:11434/api/generate", json={"model": "qwen2.5:0.5b", "prompt": prompt, "stream": False, "options": {"temperature": 0.3}}, timeout=300)
+ 
   data = response.json()
 
   return data["response"]
