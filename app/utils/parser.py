@@ -18,11 +18,17 @@ def extract_text_from_pdf(file_path):
 
 def extract_text_from_docx(file_path):
     document = docx.Document(file_path)
-
     text = ""
 
     for paragraph in document.paragraphs:
         text += paragraph.text + "\n"
+
+    for table in document.tables:
+        for row in table.rows:
+            for cell in row.cells:
+                for paragraph in cell.paragraphs:
+                    if paragraph.text.strip():
+                        text += paragraph.text + "\n"
 
     return text
 

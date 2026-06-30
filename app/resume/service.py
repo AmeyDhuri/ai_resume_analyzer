@@ -59,18 +59,16 @@ def delete_resume(resume_id, user_id):
 
 def parse_resume_text(resume):
     file_path = resume.upload_path
+    filename_lower = resume.original_filename.lower()
 
-    if resume.original_filename.endswith(".pdf"):
+    if filename_lower.endswith(".pdf"):
         raw_text = extract_text_from_pdf(file_path)
-
-    elif resume.original_filename.endswith(".docx"):
+    elif filename_lower.endswith(".docx"):
         raw_text = extract_text_from_docx(file_path)
-
     else:
         return None
 
     cleaned_text = clean_resume_text(raw_text)
-
     return cleaned_text
 
 def analyze_resume(resume_id):
@@ -83,11 +81,7 @@ def analyze_resume(resume_id):
 
     skills = extracts_skills(parsed_text)
 
-    print("Extracted Skills:", skills)
-
     ats_score = calculate_ats_score(parsed_text, skills)
-
-    print("ATS Score:", ats_score)
 
     missing_skills = get_missing_skills(skills)
 
