@@ -150,21 +150,17 @@ Dashboard
                             </a>
                         
                             <a href="{{ url_for('main.job_match', resume_id=resume.id) }}" class="btn btn-dark btn-sm">
-                                Job Match
-                            </a>
-
-                            <a href="{{ url_for('main.view_resume', resume_id=resume.id)}}" class="btn btn-primary btn-sm" target="_blank" rel="noopener noreferrer">
-                                View
+                                Job Fit?
                             </a>
 
                             {% if resume.analysis_status == "completed" %}
                                 <a href="{{ url_for('main.view_analysis', resume_id=resume.id) }}"
                                 class="btn btn-primary btn-sm">
-                                    View Analysis
+                                    Analysis
                                 </a>
                                 {% else %}
                                 <button class="btn btn-primary btn-sm" disabled>
-                                    View Analysis
+                                    Analysis
                                 </button>
                             {% endif %}
                         </div>
