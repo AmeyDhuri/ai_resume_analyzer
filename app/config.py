@@ -12,6 +12,7 @@ class Config:
     MAX_CONTENT_LENGTH = 16 * 1024 *1024
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     OLLAMA_API_URL = os.getenv("OLLAMA_API_URL")
+    OLLAMA_MODEL = os.getenv("OLLAMA_MODEL")
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
 
 class DevelopmentCofig(Config):

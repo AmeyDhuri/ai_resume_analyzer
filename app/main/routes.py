@@ -4,7 +4,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 from flask import Blueprint, render_template, redirect, request, url_for, session, flash, current_app, send_file
 from werkzeug.utils import secure_filename
 from app.resume.models import Resume
-from app.resume.service import analyze_resume, analyze_job_match
+from app.resume.service import analyze_resume, analyze_job_match, save_resume_file
 from app.resume.routes import allowed_file
 from app.auth.models import User
 from app.extensions import db
@@ -12,6 +12,7 @@ from app.auth.service import create_user, authenticate_user
 from app.admin.models import Auditlog
 from app.admin.service import create_auditlog
 from app.tasks.resume_tasks import analyze_resume_task
+from app.forms.main_forms import ChangePasswordForm
 
 main_bp = Blueprint("main", __name__)
 
@@ -132,45 +133,9 @@ def upload_resume():
                url_for("main.upload_resume")
             )
         
-        filename = secure_filename(file.filename)
+        user = User.query.filter_by(email=email).first()
 
-        upload_folder = current_app.config["UPLOAD_FOLDER"]
-
-        os.makedirs(upload_folder, exist_ok=True)
-
-        upload_path = os.path.join(
-            upload_folder,
-            filename
-        )
-
-        if os.path.exists(upload_path):
-
-            flash(
-                "File already exists!",
-                "warning"
-            )
-
-            return redirect(
-                url_for("main.upload_resume")
-            )
-
-
-        file.save(upload_path)
-
-        user = User.query.filter_by(
-            email=email
-        ).first()
-
-        resume = Resume(
-            original_filename=filename,
-            stored_filename=filename,
-            upload_path=upload_path,
-            user_id=user.id
-        )
-
-        db.session.add(resume)
-
-        db.session.commit()
+        resume = save_resume_file(file, user.id)
 
         flash(
             "Resume uploaded successfully!",
@@ -374,33 +339,57 @@ def logout():
 
    return redirect(url_for("main.login"))
 
-@main_bp.route("/change-password",methods=["GET", "POST"])
+@main_bp.route("/change-password", methods=["GET", "POST"])
 def change_password():
-   email = session.get("user_email")
 
-   if not email:
-      flash("Please login first", "danger")
-      return redirect(url_for("main.login"))
-   
-   user = User.query.filter_by(email=email).first()
+    email = session.get("user_email")
 
-   if request.method == "POST":
-      current_password = request.form.get("current_password")
+    if not email:
+        flash("Please login first", "danger")
+        return redirect(url_for("main.login"))
 
-      new_password = request.form.get("new_password")
+    user = User.query.filter_by(email=email).first()
 
-      if not check_password_hash(user.password,current_password):
-         flash("Current password is incorrect", "danger")
-         return redirect(url_for("main.change_password"))
-      
-      user.password = generate_password_hash(new_password)
+    form = ChangePasswordForm()
 
-      db.session.commit()
+    if form.validate_on_submit():
 
-      flash("Password changed successfully", "success")
-      return redirect(url_for("main.dashboard"))
-      
-   return render_template("change_password.html")
+        if not check_password_hash(
+            user.password,
+            form.current_password.data
+        ):
+            flash("Current password is incorrect.", "danger")
+            return redirect(url_for("main.change_password"))
+
+        if check_password_hash(
+            user.password,
+            form.new_password.data
+        ):
+            flash(
+                "New password cannot be the same as your current password.",
+                "warning"
+            )
+            return redirect(url_for("main.change_password"))
+
+        user.password = generate_password_hash(
+            form.new_password.data
+        )
+
+        db.session.commit()
+
+        create_auditlog(admin_id=user.id, action="CHANGED PASSWORD", target=user.email)
+
+        flash(
+            "Password changed successfully.",   
+            "success"
+        )
+
+        return redirect(url_for("main.dashboard"))
+
+    return render_template(
+        "change_password.html",
+        form=form
+    )
 
 @main_bp.route("/admin/users/<int:user_id>/promote")
 def promote_user(user_id):

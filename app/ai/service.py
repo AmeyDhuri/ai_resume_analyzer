@@ -1,5 +1,5 @@
 import requests
-
+from flask import current_app
 
 def generate_ai_feedback(resume_text):
   prompt = f"""
@@ -33,9 +33,17 @@ def generate_ai_feedback(resume_text):
   Resume:
   {resume_text[:700]}
   """
-  response = requests.post("http://127.0.0.1:11434/api/generate", json={"model": "qwen2.5:0.5b", "prompt": prompt, "stream": False, "options": {"temperature": 0.3}}, timeout=300)
- 
-  data = response.json()
+  try:
+    response = requests.post( current_app.config["OLLAMA_API_URL"] + "/api/generate", json={"model": current_app.config["OLLAMA_MODEL"], "prompt": prompt, "stream": False, "options": {"temperature": 0.3}}, timeout=300)
+    print("Status Code:", response.status_code)
+    print("Response:", response.text)
 
-  return data["response"]
+    response.raise_for_status()
 
+    data = response.json()
+
+    return data.get("response", "No response returned.")
+  
+  except Exception as e:
+        print("OLLAMA ERROR:", e)
+        raise

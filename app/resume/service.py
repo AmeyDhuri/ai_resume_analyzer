@@ -8,6 +8,7 @@ from app.resume.models import Resume
 from app.utils.parser import extract_text_from_docx, extract_text_from_pdf, clean_resume_text
 from app.utils.analyzer import extracts_skills, calculate_ats_score, get_missing_skills, generate_resume_feedback,match_resume_to_job, generate_job_fit_feedback
 from app.ai.service import generate_ai_feedback
+from app.admin.models import Auditlog
 
 def save_resume_file(file, user_id):
     original_filename = secure_filename(file.filename)
@@ -28,7 +29,13 @@ def save_resume_file(file, user_id):
         user_id=user_id
     )
 
+
     db.session.add(resume)
+    db.session.commit()
+
+    audit = Auditlog(admin_id=user_id, action="RESUME UPLOADED", target=resume.original_filename)
+
+    db.session.add(audit)
     db.session.commit()
 
     return resume
