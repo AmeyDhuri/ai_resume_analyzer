@@ -8,6 +8,7 @@ from app.extensions import db, migrate, jwt, limiter, csrf
 
 def create_app():
     app = Flask(__name__)
+    from app.logging_config import logging
     config_name = os.getenv("FLASK_ENV", "development")
 
     if config_name == "production":
@@ -106,5 +107,20 @@ def create_app():
             "success": False,
             "message": "Too many requests. Please try again later"
         }), 429
+
+    @app.errorhandler(500)
+    def internal(error):
+        return {
+            "success": False,
+            "message": "Internal server error"
+        },500
+
+
+    @app.errorhandler(403)
+    def forbidden(error):
+        return {
+            "success": False,
+            "message": "Access denied"
+        },403
 
     return app
