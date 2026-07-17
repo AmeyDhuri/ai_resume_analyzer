@@ -4,6 +4,7 @@ from flask_jwt_extended import JWTManager
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 from flask_wtf.csrf import CSRFProtect
+from flask_talisman import Talisman
 
 db = SQLAlchemy()
 
@@ -17,3 +18,5 @@ limiter = Limiter(
 )
 
 csrf = CSRFProtect()
+
+talisman = Talisman()

@@ -3,7 +3,7 @@ import logging
 from flask import Flask, jsonify
 
 from app.config import DevelopmentConfig, ProductionConfig
-from app.extensions import db, migrate, jwt, limiter, csrf
+from app.extensions import db, migrate, jwt, limiter, csrf, talisman
 
 
 def create_app():
@@ -43,6 +43,7 @@ def create_app():
     jwt.init_app(app)
     limiter.init_app(app)
     csrf.init_app(app)
+    talisman.init_app(app, force_https=False)
 
     @jwt.expired_token_loader
     def expired_token_callback(jwt_header, jwt_payload):

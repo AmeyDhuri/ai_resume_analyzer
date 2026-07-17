@@ -3,7 +3,7 @@ FROM python:3.14
 ENV TZ=Asia/Kolkata
 
 RUN apt-get update && \
-    apt-get install -y tzdata && \
+    apt-get install -y tzdata curl && \
     ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && \
     echo $TZ > /etc/timezone && \
     apt-get clean
@@ -21,5 +21,8 @@ RUN adduser --disabled-password --gecos "" appuser
 USER appuser
 
 EXPOSE 5000
+
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s \
+CMD curl --fail http://localhost:5000/health || exit 1
 
 CMD ["gunicorn", "-w", "4", "--timeout", "300", "-b", "0.0.0.0:5000", "run:app"]

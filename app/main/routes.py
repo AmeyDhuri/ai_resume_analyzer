@@ -1,7 +1,7 @@
 import os
-from sqlalchemy import func
+from sqlalchemy import func, text
 from werkzeug.security import check_password_hash, generate_password_hash
-from flask import Blueprint, render_template, redirect, request, url_for, session, flash, current_app, send_file
+from flask import Blueprint, render_template, redirect, request, url_for, session, flash, current_app, send_file, jsonify
 from werkzeug.utils import secure_filename
 from app.resume.models import Resume
 from app.resume.service import analyze_resume, analyze_job_match, save_resume_file
@@ -485,3 +485,21 @@ def view_resume(resume_id):
    return send_file(
       resume.upload_path
    )
+
+@main_bp.route("/health")
+def healthy():
+
+   try:
+
+      db.session.execute(text("SELECT 1"))
+
+      return jsonify({
+         "status": "healthy",
+         "database": "connected"
+      }),200
+   
+   except Exception:
+      return jsonify({
+         "status": "unhealthy",
+         "database": "disconnected"
+      }),500
