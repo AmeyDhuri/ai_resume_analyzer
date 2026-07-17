@@ -15,8 +15,18 @@ class Config:
     OLLAMA_MODEL = os.getenv("OLLAMA_MODEL")
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(hours=1)
 
-class DevelopmentCofig(Config):
+class DevelopmentConfig(Config):
     DEBUG = True
 
 class ProductionConfig(Config):
     DEBUG = False
+
+    TESTING = False
+
+    SESSION_COOKIE_SECURE = True
+
+    SESSION_COOKIE_HTTPONLY = True
+
+    SESSION_COOKIE_SAMESITE = "Lax"
+
+    REMEMBER_COOKIE_SECURE = True

@@ -2,13 +2,18 @@ import os
 import logging
 from flask import Flask, jsonify
 
-from app.config import Config
+from app.config import DevelopmentConfig, ProductionConfig
 from app.extensions import db, migrate, jwt, limiter, csrf
 
 
 def create_app():
     app = Flask(__name__)
-    app.config.from_object(Config)
+    config_name = os.getenv("FLASK_ENV", "development")
+
+    if config_name == "production":
+        app.config.from_object(ProductionConfig)
+    else:
+        app.config.from_object(DevelopmentConfig)
 
     app.config["UPLOAD_FOLDER"] = os.path.join(
         app.root_path,
@@ -20,9 +25,16 @@ def create_app():
         exist_ok=True
     )
 
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(message)s"
+    if app.config["DEBUG"]:
+        logging.basicConfig(
+            level=logging.DEBUG,
+            format="%(asctime)s - %(levelname)s - %(message)s"
+    )
+
+    else:
+        logging.basicConfig(
+            level=logging.INFO,
+            format="%(asctime)s - %(levelname)s - %(message)s"
     )
 
     db.init_app(app)
