@@ -4,15 +4,20 @@ __pycache__/
 *.pyd
 
 venv/
-resume-analyzer/
-
 .env
 
-instance/
-
-app/uploads/
-
-.git/
+.git
 .gitignore
 
-migrations/__pycache__
+logs/
+instance/
+
+uploads/
+
+migrations/__pycache__/
+
+.vscode/
+
+.idea/
+
+Dockerfile.dev

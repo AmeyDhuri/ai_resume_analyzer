@@ -16,7 +16,15 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
+# Create non-root user
 RUN adduser --disabled-password --gecos "" appuser
+
+# Give ownership of the application
+RUN chown -R appuser:appuser /app
+
+# Create uploads directory
+RUN mkdir -p /app/app/uploads && \
+    chown -R appuser:appuser /app/app/uploads
 
 USER appuser
 

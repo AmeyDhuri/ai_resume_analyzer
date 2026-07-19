@@ -1,6 +1,64 @@
-venv/
+# Python
 __pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual Environment
+venv/
+env/
+.venv/
+resume-analyzer/
+
+# Environment Variables
 .env
+
+# Flask
 instance/
-*.pyc
-uploads/
+.flaskenv
+
+# Uploads
+app/uploads/*
+!app/uploads/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# Database
+*.db
+*.sqlite3
+
+# Migrations cache
+migrations/__pycache__/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Docker
+docker-compose.override.yml
+
+# PostgreSQL data (if stored locally)
+postgres_data/
+
+# Ollama models (if stored locally)
+ollama/
+
+# Redis dump
+dump.rdb
+
+# Build artifacts
+dist/
+build/
+*.egg-info/

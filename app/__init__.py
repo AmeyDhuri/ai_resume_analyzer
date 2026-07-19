@@ -8,7 +8,9 @@ from app.extensions import db, migrate, jwt, limiter, csrf, talisman
 
 def create_app():
     app = Flask(__name__)
+
     from app.logging_config import logging
+
     config_name = os.getenv("FLASK_ENV", "development")
 
     if config_name == "production":
@@ -30,20 +32,51 @@ def create_app():
         logging.basicConfig(
             level=logging.DEBUG,
             format="%(asctime)s - %(levelname)s - %(message)s"
-    )
-
+        )
     else:
         logging.basicConfig(
             level=logging.INFO,
             format="%(asctime)s - %(levelname)s - %(message)s"
-    )
+        )
 
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
     limiter.init_app(app)
     csrf.init_app(app)
-    talisman.init_app(app, force_https=False)
+
+    # ----------------------------
+    # Flask-Talisman Configuration
+    # ----------------------------
+
+    csp = {
+        "default-src": "'self'",
+        "style-src": [
+            "'self'",
+            "'unsafe-inline'"
+        ],
+        "script-src": [
+            "'self'",
+            "'unsafe-inline'"
+        ],
+        "img-src": [
+            "'self'",
+            "data:"
+        ],
+        "font-src": [
+            "'self'",
+            "data:"
+        ]
+    }
+
+    talisman.init_app(
+        app,
+        force_https=False,          # Enable True after HTTPS deployment
+    )
+
+    # ----------------------------
+    # JWT Callbacks
+    # ----------------------------
 
     @jwt.expired_token_loader
     def expired_token_callback(jwt_header, jwt_payload):
@@ -58,13 +91,17 @@ def create_app():
             "success": False,
             "message": "Invalid token"
         }), 401
-    
+
     @jwt.unauthorized_loader
     def missing_token_callback(error):
         return jsonify({
             "success": False,
             "message": "Authorization token required"
         }), 401
+
+    # ----------------------------
+    # Blueprints
+    # ----------------------------
 
     from app.main.routes import main_bp
     from app.auth.routes import auth_bp
@@ -75,18 +112,17 @@ def create_app():
     from app.resume import models
 
     app.register_blueprint(main_bp)
-
     app.register_blueprint(auth_bp, url_prefix="/auth")
-
     app.register_blueprint(resume_bp, url_prefix="/resume")
-
     app.register_blueprint(admin_bp, url_prefix="/admin")
 
     csrf.exempt(auth_bp)
-
     csrf.exempt(resume_bp)
-    
     csrf.exempt(admin_bp)
+
+    # ----------------------------
+    # Error Handlers
+    # ----------------------------
 
     @app.errorhandler(404)
     def not_found(error):
@@ -111,17 +147,16 @@ def create_app():
 
     @app.errorhandler(500)
     def internal(error):
-        return {
+        return jsonify({
             "success": False,
             "message": "Internal server error"
-        },500
-
+        }), 500
 
     @app.errorhandler(403)
     def forbidden(error):
-        return {
+        return jsonify({
             "success": False,
             "message": "Access denied"
-        },403
+        }), 403
 
     return app

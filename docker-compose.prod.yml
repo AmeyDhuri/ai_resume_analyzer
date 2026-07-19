@@ -1,0 +1,97 @@
+services:
+  web:
+    build: .
+    container_name: resume-web
+
+    ports:
+      - "5000:5000"
+
+    env_file:
+      - .env
+
+    depends_on:
+      - postgres
+      - redis
+      - ollama
+
+    restart: unless-stopped
+
+    environment:
+      TZ: Asia/Kolkata
+
+    volumes:
+      - uploads:/app/app/uploads
+
+  postgres:
+    image: postgres:17
+    container_name: resume-postgres
+
+    restart: always
+
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: lolxd08
+      POSTGRES_DB: resume_db
+      TZ: Asia/Kolkata
+
+    command: postgres -c timezone=Asia/Kolkata
+
+    ports:
+      - "5432:5432"
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    container_name: resume-redis
+
+    restart: unless-stopped
+
+    environment:
+      TZ: Asia/Kolkata
+
+    ports:
+      - "6379:6379"
+
+  celery:
+    build: .
+    container_name: resume-celery
+
+    command: celery -A app.celery_app.celery worker --loglevel=info
+
+    env_file:
+      - .env
+
+    depends_on:
+      - redis
+      - postgres
+      - ollama
+
+    restart: unless-stopped
+
+    environment:
+      TZ: Asia/Kolkata
+
+    volumes:
+      - uploads:/app/app/uploads
+
+  ollama:
+    image: ollama/ollama
+    container_name: resume-ollama
+
+    restart: unless-stopped
+
+    ports:
+      - "11434:11434"
+
+    volumes:
+      - ollama:/root/.ollama
+
+    environment:
+      TZ: Asia/Kolkata
+
+volumes:
+  postgres_data:
+  ollama:
+  uploads:
