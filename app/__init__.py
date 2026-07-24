@@ -71,7 +71,8 @@ def create_app():
 
     talisman.init_app(
         app,
-        force_https=False,          # Enable True after HTTPS deployment
+        force_https=False,
+        content_security_policy=False         # Enable True after HTTPS deployment
     )
 
     # ----------------------------

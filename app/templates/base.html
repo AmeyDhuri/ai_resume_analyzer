@@ -54,11 +54,12 @@
     </a>
     {% if session.get("user_email") %}
      <div class="d-flex gap-3">
-            <a 
+            <button 
+                type="button"
                 class="nav-link text-light"
                 id="profileBtn">
                 Profile
-            </a>
+            </button>
     {% endif %}
         {% if is_admin %}
             <a href="{{ url_for('main.dashboard') }}"
@@ -144,35 +145,25 @@
 
   </script>
   <script>
-    const profileSidebar = document.getElementById("profileSidebar");
+    document.addEventListener("DOMContentLoaded", () => {
+
     const profileBtn = document.getElementById("profileBtn");
+    const profileSidebar = document.getElementById("profileSidebar");
 
-    function openProfile() {
+    if (!profileBtn || !profileSidebar) return;
 
-        if (profileSidebar) {
-            profileSidebar.classList.add("active");
-        }
+    profileBtn.addEventListener("click", () => {
+        console.log("Profile clicked");
+        profileSidebar.classList.add("active");
+    });
 
-    }
+    });
 
     function closeProfile() {
-
-        if (profileSidebar) {
-            profileSidebar.classList.remove("active");
-        }
-
+        document
+            .getElementById("profileSidebar")
+            .classList.remove("active");
     }
-
-    if (profileBtn) {
-
-        profileBtn.addEventListener("click", function () {
-
-            openProfile();
-
-        });
-
-    }
-
     </script>
   <script>
 
