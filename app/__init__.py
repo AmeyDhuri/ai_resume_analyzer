@@ -45,10 +45,6 @@ def create_app():
     limiter.init_app(app)
     csrf.init_app(app)
 
-    # ----------------------------
-    # Flask-Talisman Configuration
-    # ----------------------------
-
     csp = {
         "default-src": "'self'",
         "style-src": [
@@ -69,15 +65,7 @@ def create_app():
         ]
     }
 
-    talisman.init_app(
-        app,
-        force_https=False,
-        content_security_policy=False         # Enable True after HTTPS deployment
-    )
-
-    # ----------------------------
-    # JWT Callbacks
-    # ----------------------------
+    talisman.init_app(app, force_https=False, content_security_policy=False)         # Enable True after HTTPS deploymen
 
     @jwt.expired_token_loader
     def expired_token_callback(jwt_header, jwt_payload):
@@ -99,11 +87,7 @@ def create_app():
             "success": False,
             "message": "Authorization token required"
         }), 401
-
-    # ----------------------------
-    # Blueprints
-    # ----------------------------
-
+    
     from app.main.routes import main_bp
     from app.auth.routes import auth_bp
     from app.resume.routes import resume_bp
@@ -120,10 +104,6 @@ def create_app():
     csrf.exempt(auth_bp)
     csrf.exempt(resume_bp)
     csrf.exempt(admin_bp)
-
-    # ----------------------------
-    # Error Handlers
-    # ----------------------------
 
     @app.errorhandler(404)
     def not_found(error):
