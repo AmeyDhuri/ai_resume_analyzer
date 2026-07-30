@@ -1,97 +1,98 @@
 # AI Resume Analyzer
 
-AI Resume Analyzer is a Flask-based web application that helps users evaluate and improve their resumes using AI-powered feedback and job matching analysis.
+A Flask-based web application that uses local AI inference to evaluate resumes, identify gaps, and score them against specific job descriptions — without relying on paid external APIs.
 
-The application allows users to upload resumes, analyze them using a locally hosted AI model, compare resumes against job descriptions, and manage uploaded resumes through a user-friendly dashboard.
+Upload a resume, get structured AI feedback, compare it against a job description, and manage everything through a dashboard with JWT-secured API access.
+
+---
+
+## Why this project
+
+Most resume-screening tools either require sending your data to a third-party API (cost + latency + privacy tradeoffs) or are just static keyword matchers. This project runs inference **locally** via Ollama (Phi-3), so it can be queried repeatedly with no per-request cost, and processes uploads **asynchronously** so the API stays responsive even under load.
 
 ---
 
 ## Features
 
 ### Authentication
-
-* User registration and login
-* Secure password hashing
-* Session-based authentication
-* Password management
+- User registration and login
+- Secure password hashing
+- Session-based authentication
+- Password management
 
 ### Resume Management
-
-* Upload PDF and DOCX resumes
-* Resume storage and organization
-* View uploaded resumes
-* Delete resumes
-* Search and sort uploaded resumes
+- Upload PDF and DOCX resumes
+- Resume storage and organization
+- View, search, sort, and delete uploaded resumes
 
 ### AI Resume Analysis
-
-* Resume text extraction
-* AI-generated feedback
-* Strength analysis
-* Weakness identification
-* Missing skill suggestions
-* ATS optimization tips
-* Improvement recommendations
+- Resume text extraction (handles PDFs and DOCX, including table-based layouts)
+- AI-generated feedback across five sections:
+  - Strengths
+  - Weaknesses
+  - Missing Skills
+  - ATS Optimization Tips
+  - Improvement Recommendations
 
 ### Job Matching
+- Compare a resume against a specific job description
+- Identify skill gaps
+- Score relevance for a target role
 
-* Compare resumes against job descriptions
-* Identify skill gaps
-* Evaluate resume relevance for specific roles
-
-### Admin Features
-
-* User management
-* Resume monitoring
-* Audit logs
-* Administrative dashboard
+### Admin Dashboard
+- User management
+- Resume monitoring
+- Audit logs
+- Administrative overview
 
 ### Security
-
-* File type validation
-* Upload restrictions
-* JWT authentication for API endpoints
-* Rate limiting using Flask-Limiter
+- File type validation and upload restrictions
+- JWT authentication (Flask-JWT-Extended) for API endpoints
+- Rate limiting (Flask-Limiter) to prevent upload abuse
 
 ---
 
 ## Tech Stack
 
-### Backend
+| Layer | Technology |
+|---|---|
+| Backend | Python, Flask |
+| ORM / Migrations | Flask-SQLAlchemy, Flask-Migrate |
+| Auth | Flask-JWT-Extended |
+| Rate Limiting | Flask-Limiter |
+| Database | PostgreSQL |
+| AI Inference | Local Ollama API (Phi-3 model) |
+| Document Parsing | pdfplumber, pdfminer.six, python-docx |
+| Frontend | HTML, Bootstrap, Jinja2 |
 
-* Python
-* Flask
-* Flask-SQLAlchemy
-* Flask-Migrate
-* Flask-JWT-Extended
-* Flask-Limiter
+---
 
-### Database
+## Architecture
 
-* PostgreSQL
-
-### AI Integration
-
-* Local Ollama API
-* Phi-3 Model
-
-### Document Processing
-
-* pdfplumber
-* pdfminer.six
-* python-docx
-
-### Frontend
-
-* HTML
-* Bootstrap
-* Jinja2 Templates
+```
+Client (Browser)
+      │
+      ▼
+Flask App  ──►  JWT Auth Layer  ──►  Rate Limiter
+      │
+      ▼
+Resume Upload (PDF/DOCX)
+      │
+      ▼
+Parser (pdfplumber / python-docx)  ──►  Extracted Text
+      │
+      ▼
+AI Service  ──►  Ollama (Phi-3, local inference)
+      │
+      ▼
+Structured Feedback  ──►  PostgreSQL  ──►  Dashboard
+```
 
 ---
 
 ## Project Structure
 
-```text
+```
 ai_resume_analyzer/
 │
 ├── app/
@@ -130,17 +131,15 @@ ai_resume_analyzer/
 
 ---
 
-## Installation
+## Getting Started
 
-### 1. Clone the Repository
-
+### 1. Clone the repository
 ```bash
 git clone https://github.com/AmeyDhuri/ai_resume_analyzer.git
 cd ai_resume_analyzer
 ```
 
-### 2. Create Virtual Environment
-
+### 2. Create a virtual environment
 ```bash
 python -m venv venv
 ```
@@ -148,121 +147,95 @@ python -m venv venv
 Activate it:
 
 **Windows**
-
 ```bash
 venv\Scripts\activate
 ```
 
-**Linux/Mac**
-
+**Linux / Mac**
 ```bash
 source venv/bin/activate
 ```
 
-### 3. Install Dependencies
-
+### 3. Install dependencies
 ```bash
 pip install -r requirements.txt
 ```
 
-### 4. Configure Environment Variables
-
-Create a `.env` file:
-
+### 4. Configure environment variables
+Create a `.env` file in the project root:
 ```env
 SECRET_KEY=your_secret_key
-
 DATABASE_URL=postgresql://username:password@localhost/ai_resume_analyzer
-
 JWT_SECRET_KEY=your_jwt_secret
 ```
 
-### 5. Run Database Migrations
-
+### 5. Run database migrations
 ```bash
 flask db upgrade
 ```
 
 ### 6. Start Ollama
-
-Make sure Ollama is running locally:
-
+Make sure Ollama is installed and running locally:
 ```bash
 ollama run phi3
 ```
+The app expects Ollama at `http://127.0.0.1:11434`.
 
-The application expects Ollama at:
-
-```text
-http://127.0.0.1:11434
-```
-
-### 7. Start the Application
-
+### 7. Start the application
 ```bash
 python run.py
 ```
+Then open `http://127.0.0.1:5000` in your browser.
 
-Open:
+---
 
-```text
-http://127.0.0.1:5000
-```
+## API Overview
+
+### Resume Upload
+- Upload PDF/DOCX resumes
+- File type validation
+- Rate-limited to prevent abuse
+
+### Resume Management
+- List a user's resumes
+- Retrieve resume details
+- Delete resumes
+
+### Resume Analysis
+- Extract resume content
+- Run AI-powered review
+- Match against a job description
+
+*(For detailed request/response formats, see the route files under `app/resume/routes.py` and `app/auth/routes.py`.)*
 
 ---
 
 ## AI Feedback Format
 
-The AI generates feedback in the following sections:
+Each analysis returns structured feedback across five sections:
 
-* Strengths
-* Weaknesses
-* Missing Skills
-* ATS Tips
-* Improvements
-
-This helps users identify areas where their resume can be strengthened for better job application success.
+1. **Strengths** — what the resume does well
+2. **Weaknesses** — gaps in content or presentation
+3. **Missing Skills** — relevant skills absent from the resume
+4. **ATS Tips** — formatting/keyword changes to pass automated screening
+5. **Improvements** — concrete suggestions to strengthen the resume
 
 ---
 
-## API Features
+## Roadmap
 
-### Resume Upload
-
-* Upload PDF resumes
-* Upload DOCX resumes
-* File validation
-* Rate limiting
-
-### Resume Management
-
-* List user resumes
-* Retrieve resume details
-* Delete resumes
-
-### Resume Analysis
-
-* Extract resume content
-* AI-powered review
-* Job description matching
-
----
-
-## Future Improvements
-
-* ATS scoring system
-* Resume version comparison
-* Resume export as PDF
-* Advanced job matching
-* Recruiter dashboard
-* Email notifications
-* Resume templates
-* AI-generated resume rewriting
+- [ ] ATS scoring system (numeric match score)
+- [ ] Resume version comparison
+- [ ] Export analyzed resume as PDF
+- [ ] Advanced job matching (weighted skill relevance)
+- [ ] Recruiter-facing dashboard
+- [ ] Email notifications
+- [ ] Resume templates
+- [ ] AI-generated resume rewriting
 
 ---
 
 ## Author
 
 **Amey Dhuri**
-
-GitHub: https://github.com/AmeyDhuri
+GitHub: [@AmeyDhuri](https://github.com/AmeyDhuri)
